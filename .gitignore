@@ -1,0 +1,19 @@
+# Raw daily source exports — contain customer names, booking numbers, commodities.
+# NEVER commit these.
+*ACTUAL*.xls
+*ACTUAL*.xlsx
+*BKG*.xls
+*BKG*.xlsx
+*STAYING*.xls
+*STAYING*.xlsx
+9-*.xls
+95*.xls
+98*.xls
+
+# Reference doc
+*.docx
+
+# Python
+__pycache__/
+*.pyc
+.venv/
