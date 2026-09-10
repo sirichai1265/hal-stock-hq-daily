@@ -17,3 +17,6 @@
 __pycache__/
 *.pyc
 .venv/
+
+# local clone of the public dashboard repo (separate git repo)
+dashboard-public/

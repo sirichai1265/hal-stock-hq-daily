@@ -7,8 +7,13 @@ dashboard `index.html` สำหรับ GitHub Pages
 ## ใช้งาน
 
 ```bash
-python build_stock_hq.py 2026-09-10
+python build_stock_hq.py 2026-09-10            # สร้างรายงาน + index.html
+python build_stock_hq.py 2026-09-10 --publish  # + push dashboard ขึ้น GitHub Pages
 ```
+
+`--publish` จะ copy `index.html` ไปที่ `dashboard-public/` (local clone ของ repo
+public `hal-stock-hq-dashboard`) แล้ว commit + push → อัปเดต
+https://sirichai1265.github.io/hal-stock-hq-dashboard/
 
 วางไฟล์ 3 ไฟล์ไว้ในโฟลเดอร์เดียวกัน สคริปต์ auto-detect จากชื่อ:
 

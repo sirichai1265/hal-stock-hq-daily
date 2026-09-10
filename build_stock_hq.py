@@ -587,6 +587,10 @@ def main(argv=None):
     ap.add_argument("--actual"); ap.add_argument("--bkg"); ap.add_argument("--staying")
     ap.add_argument("--date", dest="date_opt")
     ap.add_argument("--out")
+    ap.add_argument("--dashboard-dir", default=os.path.join(HERE, "dashboard-public"),
+                    help="local clone of the public dashboard repo (default: ./dashboard-public)")
+    ap.add_argument("--publish", action="store_true",
+                    help="copy index.html into --dashboard-dir and git commit + push it")
     a = ap.parse_args(argv)
 
     det = _autodetect()
@@ -609,6 +613,26 @@ def main(argv=None):
     print("  BKG+PD :", os.path.basename(bkg))
     print("  STAYING:", os.path.basename(staying))
     build(actual, bkg, staying, report_date, out)
+
+    if a.publish:
+        publish_dashboard(os.path.join(HERE, "index.html"), a.dashboard_dir, report_date)
+
+
+def publish_dashboard(src_html, dash_dir, report_date):
+    """Copy the freshly built index.html into the public dashboard repo and push."""
+    if not os.path.isdir(os.path.join(dash_dir, ".git")):
+        print(f"  publish skipped: {dash_dir} is not a git repo "
+              f"(clone https://github.com/sirichai1265/hal-stock-hq-dashboard there first)")
+        return
+    shutil.copyfile(src_html, os.path.join(dash_dir, "index.html"))
+    subprocess.run(["git", "-C", dash_dir, "add", "index.html"], check=True)
+    r = subprocess.run(["git", "-C", dash_dir, "commit", "-m",
+                        f"dashboard {report_date:%Y-%m-%d}"], capture_output=True, text=True)
+    if r.returncode and "nothing to commit" in (r.stdout + r.stderr):
+        print("  publish: no dashboard change")
+        return
+    subprocess.run(["git", "-C", dash_dir, "push", "-q"], check=True)
+    print("  published -> https://sirichai1265.github.io/hal-stock-hq-dashboard/")
 
 
 if __name__ == "__main__":
