@@ -568,7 +568,9 @@ def recalc(path):
 # --------------------------------------------------------------------------- #
 def _autodetect():
     found = {"actual": None, "bkg": None, "staying": None}
-    for f in glob.glob(os.path.join(HERE, "*.xls")) + glob.glob(os.path.join(HERE, "*.xlsx")):
+    cand = glob.glob(os.path.join(HERE, "*.xls")) + glob.glob(os.path.join(HERE, "*.xlsx"))
+    cand.sort(key=os.path.getmtime, reverse=True)   # newest upload wins
+    for f in cand:
         name = os.path.basename(f).upper()
         if "STOCK HQ" in name or name.startswith("(HAL)"):
             continue
