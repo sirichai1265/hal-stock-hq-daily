@@ -15,6 +15,9 @@ Source files (same business day):
     * ACTUAL   - snapshot of FULL containers on hand      -> FULL INBOUND
     * STAYING  - per-container empty-stock snapshot        -> CURRENT STOCK / RF SEASONAL
     * BKG+PD   - live pickup list of not-yet-collected BKs -> BOOKING wk1 / wk2
+    * EP2      - optional P.O.D vessel arrivals list       -> REPO (E/P) row (row 14),
+                 grouped by P.O.D (THBKK/THLCH) x container type. Not every day has one;
+                 the row is simply left blank when no EP2 file is found/passed.
 """
 
 import argparse
@@ -134,6 +137,18 @@ def load_actual(path):
     return df
 
 
+def load_ep2(path):
+    """P.O.D vessel-arrivals list -> REPO (E/P) row. Container-type columns already
+    match TEMPLATE_TYPES order 1:1 (22GP, 42GP, 45GP, 22RE, 45RE, 22UT, 42UT, 22PC, 42PC)."""
+    df = load_data_sheet(path, header=0)
+    if "P.O.D" not in df.columns:
+        raise SystemExit(
+            f"{os.path.basename(path)}: expected a 'P.O.D' column - "
+            f"columns found: {list(df.columns)}"
+        )
+    return df[df["P.O.D"].notna()].copy()
+
+
 # --------------------------------------------------------------------------- #
 #  Aggregation                                                                 #
 # --------------------------------------------------------------------------- #
@@ -209,6 +224,24 @@ def rf_seasonal_counts(stay):
     return out
 
 
+def repo_ep_totals(ep2):
+    """REPO (E/P) row: EP2 rows summed by P.O.D (THBKK/THLCH) x container type.
+    ep2=None (no file that day) -> all zeros, row 14 just stays blank."""
+    out = {"BKK": _empty_counts(), "LCH": _empty_counts()}
+    if ep2 is None:
+        return out
+    pod_side = {"THBKK": "BKK", "THLCH": "LCH"}
+    for pod, side in pod_side.items():
+        sub = ep2[ep2["P.O.D"] == pod]
+        for t in TEMPLATE_TYPES:
+            if t in sub.columns:
+                out[side][t] = int(pd.to_numeric(sub[t], errors="coerce").fillna(0).sum())
+    unknown = sorted(set(ep2["P.O.D"].astype(str)) - set(pod_side))
+    if unknown:
+        print(f"  WARNING: EP2 - unmapped P.O.D value(s) {unknown}, not counted in REPO (E/P)")
+    return out
+
+
 # --------------------------------------------------------------------------- #
 #  Date-range label                                                            #
 # --------------------------------------------------------------------------- #
@@ -253,10 +286,11 @@ def hide_zero_format(ws, row, col_letters):
         ws[f"{col}{row}"].number_format = ZERO_HIDE_FORMAT
 
 
-def build(actual_path, bkg_path, staying_path, report_date, out_path):
+def build(actual_path, bkg_path, staying_path, report_date, out_path, ep2_path=None):
     actual = load_actual(actual_path)
     stay = load_staying(staying_path)
     bkg = load_booking(bkg_path)
+    ep2 = load_ep2(ep2_path) if ep2_path else None
 
     monday = report_date - dt.timedelta(days=report_date.weekday())
     sunday = monday + dt.timedelta(days=6)
@@ -268,6 +302,7 @@ def build(actual_path, bkg_path, staying_path, report_date, out_path):
     bk1 = booking(bkg, None, sunday)                       # TODAY+WK1ST: no lower bound
     bk2 = booking(bkg, next_monday, next_sunday)           # WK2ND
     rf = rf_seasonal_counts(stay)
+    repo = repo_ep_totals(ep2)                              # REPO (E/P), row 14 - optional EP2 file
 
     # STOCK END WK, computed exactly like the template's own subtraction
     sew1 = {g: {t: cs[g][t] - bk1[g][t] for t in TEMPLATE_TYPES} for g in GROUP_CODES}
@@ -301,6 +336,11 @@ def build(actual_path, bkg_path, staying_path, report_date, out_path):
             colour_row(ws, r2[g], cstock, g)
             style_negative(ws, r2[g], cstock, sew2[g])
 
+    # REPO (E/P) row 14 - not tied to a location group, so no colour_row() call;
+    # the template already carries its own preset font colour on this row.
+    write_row(ws, 14, BKK_COLS_STOCK, repo["BKK"])
+    write_row(ws, 14, LCH_COLS_STOCK, repo["LCH"])
+
     # hide a bare 0 on every STOCK END WK formula cell, full block height
     for row in list(range(31, 41)) + list(range(45, 55)):
         hide_zero_format(ws, row, BKK_COLS_STOCK)
@@ -332,12 +372,13 @@ def build(actual_path, bkg_path, staying_path, report_date, out_path):
             nf[f"{col}{row}"].number_format = ZERO_HIDE_FORMAT
 
     # NEW FORMAT Balance colour: red iff genuinely negative, else blue.
-    # Balance = CURRENT STOCK total + FULL INBOUND total - BOOKING wk1 total - BOOKING wk2 total
+    # Balance = CURRENT STOCK total (incl. REPO E/P row 14, like Daily!L15/AG15) +
+    #           FULL INBOUND total - BOOKING wk1 total - BOOKING wk2 total
     bal = {
-        "BKK": {t: sum(cs[g][t] for g in BKK_GROUPS) + sum(fi[g][t] for g in BKK_GROUPS)
+        "BKK": {t: sum(cs[g][t] for g in BKK_GROUPS) + repo["BKK"][t] + sum(fi[g][t] for g in BKK_GROUPS)
                 - sum(bk1[g][t] for g in BKK_GROUPS) - sum(bk2[g][t] for g in BKK_GROUPS)
                 for t in TEMPLATE_TYPES},
-        "LCH": {t: sum(cs[g][t] for g in LCH_GROUPS) + sum(fi[g][t] for g in LCH_GROUPS)
+        "LCH": {t: sum(cs[g][t] for g in LCH_GROUPS) + repo["LCH"][t] + sum(fi[g][t] for g in LCH_GROUPS)
                 - sum(bk1[g][t] for g in LCH_GROUPS) - sum(bk2[g][t] for g in LCH_GROUPS)
                 for t in TEMPLATE_TYPES},
     }
@@ -356,7 +397,7 @@ def build(actual_path, bkg_path, staying_path, report_date, out_path):
     # ---- HTML dashboard (index.html for GitHub Pages) ------------------- #
     dash = os.path.join(os.path.dirname(out_path) or ".", "index.html")
     write_dashboard(dash, report_date, wk1_lbl, wk2_lbl,
-                    fi, cs, bk1, bk2, sew1, sew2, bal, rf,
+                    fi, cs, bk1, bk2, sew1, sew2, bal, rf, repo,
                     os.path.basename(out_path))
     print(f"Dashboard   : {os.path.basename(dash)}")
 
@@ -463,7 +504,10 @@ def _cell(v, neg_ok):
     return f"<td>{v}</td>"
 
 
-def _table(title, groups, data, cls, neg_ok=False):
+def _table(title, groups, data, cls, neg_ok=False, extra_rows=None):
+    """extra_rows: optional [(label, values_dict, row_css_class), ...] rows appended
+    after the named groups, before TOTAL - e.g. the REPO (E/P) row, which isn't tied
+    to a location group but still counts toward the total (matches Daily!L15/AG15)."""
     th = "".join(f"<th>{t}</th>" for t in TEMPLATE_TYPES)
     rows = []
     tot = {t: 0 for t in TEMPLATE_TYPES}
@@ -473,6 +517,12 @@ def _table(title, groups, data, cls, neg_ok=False):
         for t in TEMPLATE_TYPES:
             tot[t] += int(data[g][t])
         rows.append(f"<tr><td{gcls}>{g}</td>{cells}</tr>")
+    for label, vals, rcls in (extra_rows or []):
+        gcls = f' class="{rcls}"' if rcls else ""
+        cells = "".join(_cell(int(vals[t]), neg_ok) for t in TEMPLATE_TYPES)
+        for t in TEMPLATE_TYPES:
+            tot[t] += int(vals[t])
+        rows.append(f"<tr><td{gcls}>{label}</td>{cells}</tr>")
     tcells = "".join(f"<td>{tot[t] or ''}</td>" for t in TEMPLATE_TYPES)
     rows.append(f'<tr class="total"><td>TOTAL</td>{tcells}</tr>')
     return (f'<div class="{cls}"><h3>{title}</h3><table><thead><tr><th>Group</th>{th}</tr>'
@@ -484,7 +534,7 @@ def _section(title, bkk_html, lch_html):
 
 
 def write_dashboard(path, report_date, wk1_lbl, wk2_lbl,
-                    fi, cs, bk1, bk2, sew1, sew2, bal, rf, xlsx_name):
+                    fi, cs, bk1, bk2, sew1, sew2, bal, rf, repo, xlsx_name):
     alerts = []
     for wk, sew in (("WK1", sew1), ("WK2", sew2)):
         for g in list(BKK_GROUPS) + list(LCH_GROUPS):
@@ -503,14 +553,19 @@ def write_dashboard(path, report_date, wk1_lbl, wk2_lbl,
     alert_html = ("<ul>" + "".join(alerts) + "</ul>") if alerts else \
         '<p class="ok">ไม่มีช่อง STOCK END WK ติดลบ</p>'
 
-    def metric(title, data, neg_ok=False):
+    def metric(title, data, neg_ok=False, extra=None):
+        extra = extra or {"BKK": None, "LCH": None}
         return _section(title,
-                        _table("BKK", BKK_GROUPS, data, "card bkk", neg_ok),
-                        _table("LCH", LCH_GROUPS, data, "card lch", neg_ok))
+                        _table("BKK", BKK_GROUPS, data, "card bkk", neg_ok, extra["BKK"]),
+                        _table("LCH", LCH_GROUPS, data, "card lch", neg_ok, extra["LCH"]))
 
+    repo_extra = {
+        "BKK": [("REPO (E/P)", repo["BKK"], "depot")],
+        "LCH": [("REPO (E/P)", repo["LCH"], "depot")],
+    }
     sections_html = (
         metric("FULL INBOUND", fi)
-        + metric("CURRENT STOCK", cs)
+        + metric("CURRENT STOCK", cs, extra=repo_extra)
         + metric(f"BOOKING &nbsp;{wk1_lbl}", bk1)
         + metric(f"BOOKING &nbsp;{wk2_lbl}", bk2)
         + metric(f"STOCK END WK &nbsp;{wk1_lbl}", sew1, neg_ok=True)
@@ -594,7 +649,7 @@ def recalc(path):
 #  File auto-detection / CLI                                                    #
 # --------------------------------------------------------------------------- #
 def _autodetect():
-    found = {"actual": None, "bkg": None, "staying": None}
+    found = {"actual": None, "bkg": None, "staying": None, "ep2": None}
     cand = glob.glob(os.path.join(HERE, "*.xls")) + glob.glob(os.path.join(HERE, "*.xlsx"))
     cand.sort(key=os.path.getmtime, reverse=True)   # newest upload wins
     for f in cand:
@@ -605,6 +660,8 @@ def _autodetect():
             found["actual"] = found["actual"] or f
         elif "STAY" in name:
             found["staying"] = found["staying"] or f
+        elif "EP2" in name:
+            found["ep2"] = found["ep2"] or f
         elif "BKG" in name or "BKGPD" in name or "PD" in name:
             found["bkg"] = found["bkg"] or f
     return found
@@ -614,6 +671,7 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description="Build the HAL Stock HQ daily report.")
     ap.add_argument("date", nargs="?", help="report date YYYY-MM-DD (default: today)")
     ap.add_argument("--actual"); ap.add_argument("--bkg"); ap.add_argument("--staying")
+    ap.add_argument("--ep2", help="optional P.O.D file for the REPO (E/P) row (row 14)")
     ap.add_argument("--date", dest="date_opt")
     ap.add_argument("--out")
     ap.add_argument("--dashboard-dir", default=os.path.join(HERE, "dashboard-public"),
@@ -626,6 +684,7 @@ def main(argv=None):
     actual = a.actual or det["actual"]
     bkg = a.bkg or det["bkg"]
     staying = a.staying or det["staying"]
+    ep2 = a.ep2 or det["ep2"]          # optional - a day with no EP2 file just skips row 14
     missing = [n for n, v in (("ACTUAL", actual), ("BKG+PD", bkg), ("STAYING", staying)) if not v]
     if missing:
         raise SystemExit("Missing source file(s): " + ", ".join(missing) +
@@ -641,7 +700,8 @@ def main(argv=None):
     print("  ACTUAL :", os.path.basename(actual))
     print("  BKG+PD :", os.path.basename(bkg))
     print("  STAYING:", os.path.basename(staying))
-    build(actual, bkg, staying, report_date, out)
+    print("  EP2    :", os.path.basename(ep2) if ep2 else "(none - REPO (E/P) row left blank)")
+    build(actual, bkg, staying, report_date, out, ep2_path=ep2)
 
     if a.publish:
         publish_dashboard(os.path.join(HERE, "index.html"), a.dashboard_dir, report_date)

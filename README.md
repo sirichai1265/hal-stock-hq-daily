@@ -28,6 +28,7 @@ https://sirichai1265.github.io/hal-stock-hq-dashboard/
 | `*ACTUAL*.xls` | FULL INBOUND (ตู้ FULL คงเหลือ, Move Code ≠ OFD) |
 | `*STAYING*.xls` | CURRENT STOCK + RF SEASONAL |
 | `*BKG*.xls` | BOOKING WK1ST / WK2ND |
+| `*EP2*.xls` (ไม่บังคับ) | REPO (E/P) แถว 14 — รวมตามชนิดตู้จากคอลัมน์ P.O.D (THBKK/THLCH) วันไหนไม่มีไฟล์นี้ แถว 14 จะเว้นว่างไว้ |
 
 ผลลัพธ์:
 - `HAL Stock HQ - Daily <YYYY-MM-DD>.xlsx` — ไฟล์รายงาน
