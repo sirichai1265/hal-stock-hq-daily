@@ -407,25 +407,40 @@ def neg_note(g, t, v, fi):
 # --------------------------------------------------------------------------- #
 #  HTML dashboard                                                              #
 # --------------------------------------------------------------------------- #
+# NOTE: this must stay byte-for-byte in sync with what's live on the public
+# dashboard repo (hal-stock-hq-dashboard) — a colleague (Numtarn) redesigned it
+# there directly on 2026-09-11 (logo + BKK/LCH side-by-side per-metric layout).
+# Keep new builds matching that design; don't silently revert it.
 DASH_CSS = """
-:root{--bg:#f6f7f9;--card:#fff;--ink:#1c2530;--mut:#667085;--line:#e3e6ea;
---depot:#1a56db;--neg:#b42318;--negbg:#fff0ef;--head:#0f2942;--accent:#0f6fff}
-@media (prefers-color-scheme:dark){:root{--bg:#0e1116;--card:#161b22;--ink:#e6edf3;
---mut:#9aa4b2;--line:#2a313c;--depot:#6ea8ff;--neg:#ff8079;--negbg:#3a1c1a;--head:#c9d6e5;--accent:#4f9dff}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);
+:root{--bg-a:#eaf1fb;--bg-b:#f8f5f2;--card:#fff;--ink:#1c2530;--mut:#66738a;--line:#e3e8f0;
+--depot:#1a56db;--neg:#c0192b;--negbg:#fff1f0;--head:#0d2b46;--accent:#0f6fff;--accent2:#d0202f;--chip:#eaf2ff}
+*{box-sizing:border-box}body{margin:0;color:var(--ink);
+background:linear-gradient(160deg,var(--bg-a) 0%,#f7f9fc 40%,var(--bg-b) 100%) fixed;
 font:14px/1.5 -apple-system,Segoe UI,Roboto,"Noto Sans Thai",sans-serif}
-.wrap{max-width:1180px;margin:0 auto;padding:28px 20px 60px}
-h1{font-size:21px;margin:0 0 2px}.sub{color:var(--mut);margin:0 0 18px}
-.meta{display:flex;gap:22px;flex-wrap:wrap;margin:0 0 22px;font-size:13px;color:var(--mut)}
+.accent-bar{height:5px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.wrap{max-width:1180px;margin:0 auto;padding:24px 20px 60px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;
+background:var(--card);border:1px solid var(--line);border-radius:14px;
+padding:18px 24px;margin:0 0 18px;box-shadow:0 3px 10px rgba(16,24,40,.06)}
+.topbar img{height:46px;width:auto;object-fit:contain}
+h1{font-size:21px;margin:0 0 2px;color:var(--head)}.sub{color:var(--mut);margin:0}
+.meta{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 24px;font-size:12.5px;color:var(--mut)}
+.meta span{background:var(--card);border:1px solid var(--line);padding:5px 12px;border-radius:8px}
 .meta b{color:var(--ink)}
-.alert{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--neg);
-border-radius:10px;padding:14px 16px;margin:0 0 24px}
+.alert{background:linear-gradient(180deg,#fff6f5,#fff);border:1px solid var(--line);border-left:4px solid var(--neg);
+border-radius:12px;padding:14px 16px;margin:30px 0 0;box-shadow:0 2px 8px rgba(16,24,40,.05)}
 .alert h2{font-size:14px;margin:0 0 8px;color:var(--neg)}
 .alert ul{margin:0;padding-left:18px}.alert li{margin:3px 0}
 .alert .ok{color:var(--mut)}
+.section{margin:0 0 28px}
+.section h2{display:inline-block;font-size:12.5px;font-weight:700;letter-spacing:.03em;
+margin:0 0 12px;color:var(--head);background:var(--chip);padding:5px 14px;border-radius:999px}
 .grid{display:grid;gap:22px}
 @media(min-width:900px){.grid{grid-template-columns:1fr 1fr}}
-.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow-x:auto}
+.card{background:var(--card);border:1px solid var(--line);border-top:3px solid var(--line);
+border-radius:12px;padding:14px 16px 16px;overflow-x:auto;box-shadow:0 2px 8px rgba(16,24,40,.05)}
+.card.bkk{border-top-color:var(--accent)}
+.card.lch{border-top-color:var(--accent2)}
 .card h3{font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--head);margin:0 0 10px}
 table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
 th,td{padding:5px 7px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
@@ -448,20 +463,24 @@ def _cell(v, neg_ok):
     return f"<td>{v}</td>"
 
 
-def _table(title, groups, data, neg_ok=False):
+def _table(title, groups, data, cls, neg_ok=False):
     th = "".join(f"<th>{t}</th>" for t in TEMPLATE_TYPES)
     rows = []
     tot = {t: 0 for t in TEMPLATE_TYPES}
     for g in groups:
-        cls = ' class="depot"' if GROUP_TYPE[g] == "DEPOT" else ""
+        gcls = ' class="depot"' if GROUP_TYPE[g] == "DEPOT" else ""
         cells = "".join(_cell(int(data[g][t]), neg_ok) for t in TEMPLATE_TYPES)
         for t in TEMPLATE_TYPES:
             tot[t] += int(data[g][t])
-        rows.append(f"<tr><td{cls}>{g}</td>{cells}</tr>")
+        rows.append(f"<tr><td{gcls}>{g}</td>{cells}</tr>")
     tcells = "".join(f"<td>{tot[t] or ''}</td>" for t in TEMPLATE_TYPES)
     rows.append(f'<tr class="total"><td>TOTAL</td>{tcells}</tr>')
-    return (f'<div class="card"><h3>{title}</h3><table><thead><tr><th>Group</th>{th}</tr>'
+    return (f'<div class="{cls}"><h3>{title}</h3><table><thead><tr><th>Group</th>{th}</tr>'
             f"</thead><tbody>{''.join(rows)}</tbody></table></div>")
+
+
+def _section(title, bkk_html, lch_html):
+    return f"<div class='section'><h2>{title}</h2><div class='grid'>{bkk_html}{lch_html}</div></div>"
 
 
 def write_dashboard(path, report_date, wk1_lbl, wk2_lbl,
@@ -484,15 +503,19 @@ def write_dashboard(path, report_date, wk1_lbl, wk2_lbl,
     alert_html = ("<ul>" + "".join(alerts) + "</ul>") if alerts else \
         '<p class="ok">ไม่มีช่อง STOCK END WK ติดลบ</p>'
 
-    def side_block(name, groups):
-        return (f"<h2 style='font-size:16px;margin:26px 0 12px'>{name}</h2><div class='grid'>"
-                + _table("FULL INBOUND", groups, fi)
-                + _table("CURRENT STOCK", groups, cs)
-                + _table(f"BOOKING &nbsp;{wk1_lbl}", groups, bk1)
-                + _table(f"BOOKING &nbsp;{wk2_lbl}", groups, bk2)
-                + _table(f"STOCK END WK &nbsp;{wk1_lbl}", groups, sew1, neg_ok=True)
-                + _table(f"STOCK END WK &nbsp;{wk2_lbl}", groups, sew2, neg_ok=True)
-                + "</div>")
+    def metric(title, data, neg_ok=False):
+        return _section(title,
+                        _table("BKK", BKK_GROUPS, data, "card bkk", neg_ok),
+                        _table("LCH", LCH_GROUPS, data, "card lch", neg_ok))
+
+    sections_html = (
+        metric("FULL INBOUND", fi)
+        + metric("CURRENT STOCK", cs)
+        + metric(f"BOOKING &nbsp;{wk1_lbl}", bk1)
+        + metric(f"BOOKING &nbsp;{wk2_lbl}", bk2)
+        + metric(f"STOCK END WK &nbsp;{wk1_lbl}", sew1, neg_ok=True)
+        + metric(f"STOCK END WK &nbsp;{wk2_lbl}", sew2, neg_ok=True)
+    )
 
     # RF SEASONAL mini-table
     rf_rows = []
@@ -511,19 +534,23 @@ def write_dashboard(path, report_date, wk1_lbl, wk2_lbl,
     html = f"""<!doctype html><html lang="th"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>HAL Stock HQ &ndash; Daily {report_date:%Y-%m-%d}</title>
-<style>{DASH_CSS}</style></head><body><div class="wrap">
-<h1>HAL Stock HQ &ndash; Daily Container Stock</h1>
-<p class="sub">รายงานประจำวันที่ {report_date:%d/%m/%Y} ({report_date:%A})</p>
+<style>{DASH_CSS}</style></head><body>
+<div class="accent-bar"></div>
+<div class="wrap">
+<div class="topbar">
+<div><h1>HAL Stock HQ &ndash; Daily Container Stock</h1>
+<p class="sub">รายงานประจำวันที่ {report_date:%d/%m/%Y} ({report_date:%A})</p></div>
+<img src="logo.png" alt="logo">
+</div>
 <div class="meta">
 <span>WK 1ST: <b>{wk1_lbl}</b></span>
 <span>WK 2ND: <b>{wk2_lbl}</b></span>
 <span>Excel: <b>{xlsx_name}</b></span>
 <span>สร้างเมื่อ <b>{dt.datetime.now():%Y-%m-%d %H:%M}</b></span>
 </div>
-<div class="alert"><h2>&#9888; ช่อง STOCK END WK ที่ติดลบ</h2>{alert_html}</div>
-{side_block("BKK side", BKK_GROUPS)}
-{side_block("LCH side", LCH_GROUPS)}
+{sections_html}
 {rf_html}
+<div class="alert"><h2>&#9888; ช่อง STOCK END WK ที่ติดลบ</h2>{alert_html}</div>
 <footer>สร้างอัตโนมัติจาก build_stock_hq.py &middot; ตัวเลขเป็นยอดรวมรายกลุ่มสถานที่ (ไม่มีชื่อลูกค้า/เลขบุ๊คกิ้ง)</footer>
 </div></body></html>"""
     with open(path, "w", encoding="utf-8") as fh:
