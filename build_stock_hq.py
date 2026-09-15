@@ -483,12 +483,14 @@ def neg_note(g, t, v, fi):
 #  HTML dashboard                                                              #
 # --------------------------------------------------------------------------- #
 # NOTE: this must stay byte-for-byte in sync with what's live on the public
-# dashboard repo (hal-stock-hq-dashboard) — a colleague (Numtarn) redesigned it
-# there directly on 2026-09-11 (logo + BKK/LCH side-by-side per-metric layout).
-# Keep new builds matching that design; don't silently revert it.
+# dashboard repo (hal-stock-hq-dashboard) - this is Numtarn's merged-table /
+# filter-buttons / live-clock redesign (commits 9f9d7c8..a074448, 2026-09-14),
+# reused verbatim (CSS + JS) with our own data plugged in. If it gets
+# redesigned again, re-sync from the live site rather than silently reverting.
 DASH_CSS = """
 :root{--bg-a:#eaf1fb;--bg-b:#f8f5f2;--card:#fff;--ink:#1c2530;--mut:#66738a;--line:#e3e8f0;
---depot:#1a56db;--neg:#c0192b;--negbg:#fff1f0;--head:#0d2b46;--accent:#0f6fff;--accent2:#d0202f;--chip:#eaf2ff}
+--depot:#1a56db;--neg:#c0192b;--negbg:#fff1f0;--head:#0d2b46;--accent:#0f6fff;--accent2:#d0202f;--chip:#eaf2ff;
+--grid:#c7ccd6;--headbg:#eef0f4}
 *{box-sizing:border-box}body{margin:0;color:var(--ink);
 background:linear-gradient(160deg,var(--bg-a) 0%,#f7f9fc 40%,var(--bg-b) 100%) fixed;
 font:14px/1.5 -apple-system,Segoe UI,Roboto,"Noto Sans Thai",sans-serif}
@@ -497,11 +499,24 @@ font:14px/1.5 -apple-system,Segoe UI,Roboto,"Noto Sans Thai",sans-serif}
 .topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;
 background:var(--card);border:1px solid var(--line);border-radius:14px;
 padding:18px 24px;margin:0 0 18px;box-shadow:0 3px 10px rgba(16,24,40,.06)}
+.topbar-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
 .topbar img{height:46px;width:auto;object-fit:contain}
+.live-clock{text-align:right;line-height:1.35}
+.live-clock .lc-date{font-size:11.5px;color:var(--mut);white-space:nowrap}
+.live-clock .lc-time{font-size:15px;font-weight:700;color:var(--head);font-variant-numeric:tabular-nums;white-space:nowrap}
 h1{font-size:21px;margin:0 0 2px;color:var(--head)}.sub{color:var(--mut);margin:0}
-.meta{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 24px;font-size:12.5px;color:var(--mut)}
+.meta{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 16px;font-size:12.5px;color:var(--mut)}
 .meta span{background:var(--card);border:1px solid var(--line);padding:5px 12px;border-radius:8px}
 .meta b{color:var(--ink)}
+.filter-bar{display:flex;gap:8px;margin:0 0 24px}
+.filter-btn{cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--mut);
+font-size:12.5px;font-weight:700;letter-spacing:.03em;padding:7px 18px;border-radius:999px;transition:all .15s}
+.filter-btn:hover{border-color:var(--accent);color:var(--head)}
+.filter-btn.active{color:#fff;border-color:transparent}
+.filter-btn[data-filter="all"].active{background:var(--head)}
+.filter-btn[data-filter="bkk"].active{background:var(--accent)}
+.filter-btn[data-filter="lch"].active{background:var(--accent2)}
+.hide{display:none!important}
 .alert{background:linear-gradient(180deg,#fff6f5,#fff);border:1px solid var(--line);border-left:4px solid var(--neg);
 border-radius:12px;padding:14px 16px;margin:30px 0 0;box-shadow:0 2px 8px rgba(16,24,40,.05)}
 .alert h2{font-size:14px;margin:0 0 8px;color:var(--neg)}
@@ -510,61 +525,99 @@ border-radius:12px;padding:14px 16px;margin:30px 0 0;box-shadow:0 2px 8px rgba(1
 .section{margin:0 0 28px}
 .section h2{display:inline-block;font-size:12.5px;font-weight:700;letter-spacing:.03em;
 margin:0 0 12px;color:var(--head);background:var(--chip);padding:5px 14px;border-radius:999px}
-.grid{display:grid;gap:22px}
-@media(min-width:900px){.grid{grid-template-columns:1fr 1fr}}
+.grid{display:grid;gap:22px;grid-template-columns:1fr}
 .card{background:var(--card);border:1px solid var(--line);border-top:3px solid var(--line);
 border-radius:12px;padding:14px 16px 16px;overflow-x:auto;box-shadow:0 2px 8px rgba(16,24,40,.05)}
 .card.bkk{border-top-color:var(--accent)}
 .card.lch{border-top-color:var(--accent2)}
 .card h3{font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--head);margin:0 0 10px}
+.side-tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.05em;
+margin:0 0 10px;padding:3px 10px;border-radius:6px}
+.side-tag.bkk{background:var(--chip);color:var(--accent)}
+.side-tag.lch{background:#fdecec;color:var(--accent2)}
 table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
-th,td{padding:5px 7px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
-th:first-child,td:first-child{text-align:left}
-thead th{font-size:11px;color:var(--mut);font-weight:600;border-bottom:1px solid var(--line)}
-tbody tr:last-child td{border-bottom:none}
-tr.total td{font-weight:700;border-top:2px solid var(--line)}
+th,td{padding:5px 7px;text-align:right;border:1px solid var(--grid);white-space:nowrap}
+th:first-child,td:first-child,th:nth-child(2),td:nth-child(2){text-align:left}
+thead th{font-size:11px;color:var(--ink);font-weight:700;background:var(--headbg)}
+thead tr:first-child th[colspan]{text-align:center;background:var(--headbg);color:var(--ink);
+font-size:11px;text-transform:uppercase;letter-spacing:.03em;padding:6px 4px}
+thead tr:first-child th.blk2{color:var(--depot)}
+tr.total td{font-weight:700;background:var(--headbg);border-top:2px solid var(--grid)}
 td.depot,th.depot{color:var(--depot)}
+td.type{color:var(--ink);font-size:11.5px}
 td.neg{color:var(--neg);font-weight:700;background:var(--negbg)}
 .zero{color:var(--line)}
+th.divider,td.divider{border-left:2px solid var(--grid)}
 footer{margin-top:30px;color:var(--mut);font-size:12px;text-align:center}
 """
 
 
-def _cell(v, neg_ok):
+def _mcell(v, neg=False, divider=False, depot=False):
+    cls = []
     if v == 0:
-        return '<td class="zero">·</td>'
-    if neg_ok and v < 0:
-        return f'<td class="neg">{v}</td>'
-    return f"<td>{v}</td>"
+        cls.append("zero")
+    elif neg and v < 0:
+        cls.append("neg")
+    if divider:
+        cls.append("divider")
+    if depot:
+        cls.append("depot")
+    cls_str = f' class="{" ".join(cls)}"' if cls else ""
+    text = "·" if v == 0 else str(v)
+    return f"<td{cls_str}>{text}</td>"
 
 
-def _table(title, groups, data, cls, neg_ok=False, extra_rows=None):
-    """extra_rows: optional [(label, values_dict, row_css_class), ...] rows appended
-    after the named groups, before TOTAL - e.g. the REPO (E/P) row, which isn't tied
-    to a location group but still counts toward the total (matches Daily!L15/AG15)."""
-    th = "".join(f"<th>{t}</th>" for t in TEMPLATE_TYPES)
+def _mrow(label, type_label, left_vals, right_vals, is_depot, right_neg_ok):
+    lcls = ' class="depot"' if is_depot else ""
+    left_cells = "".join(_mcell(int(left_vals[t]), depot=is_depot) for t in TEMPLATE_TYPES)
+    right_cells = "".join(
+        _mcell(int(right_vals[t]), neg=right_neg_ok, divider=(i == 0), depot=is_depot)
+        for i, t in enumerate(TEMPLATE_TYPES)
+    )
+    return f"<tr><td{lcls}>{label}</td><td class='type'>{type_label}</td>{left_cells}{right_cells}</tr>"
+
+
+def _mtotal(left_tot, right_tot):
+    left_cells = "".join(f"<td>{left_tot[t] or ''}</td>" for t in TEMPLATE_TYPES)
+    right_cells = "".join(
+        f'<td class="divider">{right_tot[t] or ""}</td>' if i == 0 else f"<td>{right_tot[t] or ''}</td>"
+        for i, t in enumerate(TEMPLATE_TYPES)
+    )
+    return f"<tr class='total'><td>TOTAL</td><td></td>{left_cells}{right_cells}</tr>"
+
+
+def _merged_table(side_label, side_cls, groups, left, right, left_title, right_title,
+                  right_neg_ok=False, extra_rows=None):
+    """One BKK/LCH card: Location + Type + a 9-col left block + a 9-col right block
+    (divider rule on the right block's first column) - e.g. FULL INBOUND | CURRENT
+    STOCK, or BOOKING | STOCK BALANCE END WK. extra_rows: optional
+    [(label, left_vals, right_vals, is_depot), ...] appended before TOTAL, e.g.
+    REPO (E/P) which isn't tied to a location group."""
+    left_head = "".join(f"<th>{t}</th>" for t in TEMPLATE_TYPES)
+    right_head = (f'<th class="divider">{TEMPLATE_TYPES[0]}</th>'
+                  + "".join(f"<th>{t}</th>" for t in TEMPLATE_TYPES[1:]))
     rows = []
-    tot = {t: 0 for t in TEMPLATE_TYPES}
+    tot_l = {t: 0 for t in TEMPLATE_TYPES}
+    tot_r = {t: 0 for t in TEMPLATE_TYPES}
     for g in groups:
-        gcls = ' class="depot"' if GROUP_TYPE[g] == "DEPOT" else ""
-        cells = "".join(_cell(int(data[g][t]), neg_ok) for t in TEMPLATE_TYPES)
+        is_depot = GROUP_TYPE[g] == "DEPOT"
+        lv, rv = left[g], right[g]
         for t in TEMPLATE_TYPES:
-            tot[t] += int(data[g][t])
-        rows.append(f"<tr><td{gcls}>{g}</td>{cells}</tr>")
-    for label, vals, rcls in (extra_rows or []):
-        gcls = f' class="{rcls}"' if rcls else ""
-        cells = "".join(_cell(int(vals[t]), neg_ok) for t in TEMPLATE_TYPES)
+            tot_l[t] += int(lv[t]); tot_r[t] += int(rv[t])
+        rows.append(_mrow(g, GROUP_TYPE[g], lv, rv, is_depot, right_neg_ok))
+    for label, lv, rv, is_depot in (extra_rows or []):
         for t in TEMPLATE_TYPES:
-            tot[t] += int(vals[t])
-        rows.append(f"<tr><td{gcls}>{label}</td>{cells}</tr>")
-    tcells = "".join(f"<td>{tot[t] or ''}</td>" for t in TEMPLATE_TYPES)
-    rows.append(f'<tr class="total"><td>TOTAL</td>{tcells}</tr>')
-    return (f'<div class="{cls}"><h3>{title}</h3><table><thead><tr><th>Group</th>{th}</tr>'
-            f"</thead><tbody>{''.join(rows)}</tbody></table></div>")
+            tot_l[t] += int(lv[t]); tot_r[t] += int(rv[t])
+        rows.append(_mrow(label, "", lv, rv, is_depot, right_neg_ok))
+    rows.append(_mtotal(tot_l, tot_r))
+    return (f'<div class="card {side_cls}"><div class="side-tag {side_cls}">{side_label}</div>'
+            f"<table><thead><tr><th rowspan='2'>Location</th><th rowspan='2'>Type</th>"
+            f"<th colspan='9'>{left_title}</th><th colspan='9' class=\"divider blk2\">{right_title}</th></tr>"
+            f"<tr>{left_head}{right_head}</tr></thead><tbody>{''.join(rows)}</tbody></table></div>")
 
 
-def _section(title, bkk_html, lch_html):
-    return f"<div class='section'><h2>{title}</h2><div class='grid'>{bkk_html}{lch_html}</div></div>"
+def _msection(title, bkk_card, lch_card):
+    return f"<div class='section'><h2>{title}</h2><div class='grid'>{bkk_card}{lch_card}</div></div>"
 
 
 def write_dashboard(path, report_date, wk1_lbl, wk2_lbl,
@@ -587,24 +640,32 @@ def write_dashboard(path, report_date, wk1_lbl, wk2_lbl,
     alert_html = ("<ul>" + "".join(alerts) + "</ul>") if alerts else \
         '<p class="ok">ไม่มีช่อง STOCK BALANCE END WK ติดลบ</p>'
 
-    def metric(title, data, neg_ok=False, extra=None):
-        extra = extra or {"BKK": None, "LCH": None}
-        return _section(title,
-                        _table("BKK", BKK_GROUPS, data, "card bkk", neg_ok, extra["BKK"]),
-                        _table("LCH", LCH_GROUPS, data, "card lch", neg_ok, extra["LCH"]))
-
     repo_extra = {
-        "BKK": [("REPO (E/P)", repo["BKK"], "depot")],
-        "LCH": [("REPO (E/P)", repo["LCH"], "depot")],
+        "BKK": [("REPO (E/P)", _empty_counts(), repo["BKK"], True)],
+        "LCH": [("REPO (E/P)", _empty_counts(), repo["LCH"], True)],
     }
-    sections_html = (
-        metric("FULL INBOUND", fi)
-        + metric("CURRENT STOCK", cs, extra=repo_extra)
-        + metric(f"BOOKING &nbsp;{wk1_lbl}", bk1)
-        + metric(f"BOOKING &nbsp;{wk2_lbl}", bk2)
-        + metric(f"STOCK BALANCE END WK &nbsp;{wk1_lbl}", sew1, neg_ok=True)
-        + metric(f"STOCK BALANCE END WK &nbsp;{wk2_lbl}", sew2, neg_ok=True)
+    sec1 = _msection(
+        "FULL INBOUND &amp; CURRENT STOCK",
+        _merged_table("BKK", "bkk", BKK_GROUPS, fi, cs, "FULL INBOUND", "CURRENT STOCK",
+                      extra_rows=repo_extra["BKK"]),
+        _merged_table("LCH", "lch", LCH_GROUPS, fi, cs, "FULL INBOUND", "CURRENT STOCK",
+                      extra_rows=repo_extra["LCH"]),
     )
+    sec2 = _msection(
+        f"BOOKING &amp; STOCK BALANCE END WK &nbsp;{wk1_lbl}",
+        _merged_table("BKK", "bkk", BKK_GROUPS, bk1, sew1,
+                      f"BOOKING {wk1_lbl}", f"STOCK BALANCE END WK {wk1_lbl}", right_neg_ok=True),
+        _merged_table("LCH", "lch", LCH_GROUPS, bk1, sew1,
+                      f"BOOKING {wk1_lbl}", f"STOCK BALANCE END WK {wk1_lbl}", right_neg_ok=True),
+    )
+    sec3 = _msection(
+        f"BOOKING &amp; STOCK BALANCE END WK &nbsp;{wk2_lbl}",
+        _merged_table("BKK", "bkk", BKK_GROUPS, bk2, sew2,
+                      f"BOOKING {wk2_lbl}", f"STOCK BALANCE END WK {wk2_lbl}", right_neg_ok=True),
+        _merged_table("LCH", "lch", LCH_GROUPS, bk2, sew2,
+                      f"BOOKING {wk2_lbl}", f"STOCK BALANCE END WK {wk2_lbl}", right_neg_ok=True),
+    )
+    sections_html = sec1 + sec2 + sec3
 
     # RF SEASONAL mini-table
     rf_rows = []
@@ -629,16 +690,60 @@ def write_dashboard(path, report_date, wk1_lbl, wk2_lbl,
 <div class="topbar">
 <div><h1>HAL Stock HQ &ndash; Daily Container Stock</h1>
 <p class="sub">รายงานประจำวันที่ {report_date:%d/%m/%Y} ({report_date:%A})</p></div>
+<div class="topbar-right">
 <img src="logo.png" alt="logo">
+<div id="liveClock" class="live-clock"><span class="lc-date">&nbsp;</span><span class="lc-time">&nbsp;</span></div>
+</div>
 </div>
 <div class="meta">
 <span>สร้างเมื่อ <b>{dt.datetime.now():%Y-%m-%d %H:%M}</b></span>
+</div>
+<div class="filter-bar">
+<button type="button" class="filter-btn active" data-filter="all">ALL</button>
+<button type="button" class="filter-btn" data-filter="bkk">THBKK</button>
+<button type="button" class="filter-btn" data-filter="lch">THLCH</button>
 </div>
 {sections_html}
 {rf_html}
 <div class="alert"><h2>&#9888; ช่อง STOCK BALANCE END WK ที่ติดลบ</h2>{alert_html}</div>
 <footer>สร้างอัตโนมัติจาก build_stock_hq.py &middot; ตัวเลขเป็นยอดรวมรายกลุ่มสถานที่ (ไม่มีชื่อลูกค้า/เลขบุ๊คกิ้ง)</footer>
-</div></body></html>"""
+</div>
+<script>
+(function(){{
+  var dateEl = document.querySelector('#liveClock .lc-date');
+  var timeEl = document.querySelector('#liveClock .lc-time');
+  var dateFmt = new Intl.DateTimeFormat('en-US', {{weekday:'long', year:'numeric', month:'long', day:'numeric'}});
+  function tick(){{
+    var now = new Date();
+    dateEl.textContent = dateFmt.format(now);
+    timeEl.textContent = now.toLocaleTimeString('en-US', {{hour12:false}});
+  }}
+  tick();
+  setInterval(tick, 1000);
+}})();
+(function(){{
+  var buttons = Array.prototype.slice.call(document.querySelectorAll('.filter-btn'));
+  var bkkCards = document.querySelectorAll('.card.bkk');
+  var lchCards = document.querySelectorAll('.card.lch');
+  function apply(filter){{
+    for (var i = 0; i < bkkCards.length; i++) {{
+      bkkCards[i].classList.toggle('hide', filter === 'lch');
+    }}
+    for (var j = 0; j < lchCards.length; j++) {{
+      lchCards[j].classList.toggle('hide', filter === 'bkk');
+    }}
+    buttons.forEach(function(b){{ b.classList.toggle('active', b.dataset.filter === filter); }});
+    try {{ localStorage.setItem('halStockFilter', filter); }} catch (e) {{}}
+  }}
+  buttons.forEach(function(b){{
+    b.addEventListener('click', function(){{ apply(b.dataset.filter); }});
+  }});
+  var saved = 'all';
+  try {{ saved = localStorage.getItem('halStockFilter') || 'all'; }} catch (e) {{}}
+  apply(saved);
+}})();
+</script>
+</body></html>"""
     with open(path, "w", encoding="utf-8") as fh:
         fh.write(html)
 
