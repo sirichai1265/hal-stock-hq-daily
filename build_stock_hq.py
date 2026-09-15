@@ -111,13 +111,27 @@ def load_data_sheet(path, header=0):
 
 
 def load_booking(path):
+    """Outstanding-pickup list. Two schema variants seen so far, both handled here:
+    - BKG+PD.xls: columns GP22/GP42/.., TRAN DT as a YYYYMMDD float, footer row has
+      every field (including BK No) blank.
+    - *PENDING*.xlsx ("Daily Booking" sheet): columns "GP22 Remaining"/.., TRAN DT
+      already a real date, footer row has BK No == 'TOTAL' but Pickup still blank.
+    Never hardcode the exact filename/schema - match by content (see module docstring)."""
     df = load_data_sheet(path, header=0)
     if "Pickup" not in df.columns:                       # a title row sat above the header
         df = load_data_sheet(path, header=1)
-    df = df[df["BK No"].notna()].copy()                  # drop the trailing total row
-    df["_date"] = pd.to_datetime(
-        df["TRAN DT"].astype("Int64").astype(str), format="%Y%m%d", errors="coerce"
-    )
+    df = df[df["Pickup"].notna()].copy()                 # drop the trailing total/footer row
+                                                          # (works whether or not BK No is blank there)
+    rename = {f"{src} Remaining": src for src in BKG_TYPE_COL
+              if f"{src} Remaining" in df.columns and src not in df.columns}
+    if rename:
+        df = df.rename(columns=rename)
+    if pd.api.types.is_numeric_dtype(df["TRAN DT"]):
+        df["_date"] = pd.to_datetime(
+            df["TRAN DT"].astype("Int64").astype(str), format="%Y%m%d", errors="coerce"
+        )
+    else:
+        df["_date"] = pd.to_datetime(df["TRAN DT"], errors="coerce")
     return df
 
 
@@ -648,10 +662,29 @@ def recalc(path):
 # --------------------------------------------------------------------------- #
 #  File auto-detection / CLI                                                    #
 # --------------------------------------------------------------------------- #
+def _sniff_role(path):
+    """Fallback for a file whose name matches none of the keywords below - peek at its
+    columns instead. Only used for the roles that have already changed name once
+    (bkg: BKG+PD -> *PENDING*; ep2: EP2 -> EMPTY), since ACTUAL/STAYING share an
+    identical column set and can only be told apart by name."""
+    try:
+        for header in (0, 1):
+            df = load_data_sheet(path, header=header)
+            cols = set(df.columns)
+            if {"BK No", "Pickup", "TRAN DT"} <= cols:
+                return "bkg"
+            if "P.O.D" in cols and "BK No" not in cols:
+                return "ep2"
+    except Exception:
+        pass
+    return None
+
+
 def _autodetect():
     found = {"actual": None, "bkg": None, "staying": None, "ep2": None}
     cand = glob.glob(os.path.join(HERE, "*.xls")) + glob.glob(os.path.join(HERE, "*.xlsx"))
     cand.sort(key=os.path.getmtime, reverse=True)   # newest upload wins
+    unclaimed = []
     for f in cand:
         name = os.path.basename(f).upper()
         if "STOCK HQ" in name or name.startswith("(HAL)"):
@@ -660,10 +693,20 @@ def _autodetect():
             found["actual"] = found["actual"] or f
         elif "STAY" in name:
             found["staying"] = found["staying"] or f
-        elif "EP2" in name:
+        elif "EP2" in name or "EMPTY" in name:
             found["ep2"] = found["ep2"] or f
-        elif "BKG" in name or "BKGPD" in name or "PD" in name:
+        elif "BKG" in name or "BKGPD" in name or "PD" in name or "PENDING" in name:
             found["bkg"] = found["bkg"] or f
+        else:
+            unclaimed.append(f)
+    for f in unclaimed:                              # content sniff, name-based pass found nothing
+        if found["bkg"] and found["ep2"]:
+            break
+        role = _sniff_role(f)
+        if role == "bkg" and not found["bkg"]:
+            found["bkg"] = f
+        elif role == "ep2" and not found["ep2"]:
+            found["ep2"] = f
     return found
 
 
