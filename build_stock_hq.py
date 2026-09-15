@@ -135,6 +135,24 @@ def load_booking(path):
     return df
 
 
+def load_booking_all(paths):
+    """Load and combine one or more outstanding-pickup-list files. Starting
+    2026-09-15 the export comes split in two: a backlog/overdue view
+    (*PENDING*.xlsx, every TRAN DT before today) plus a forward view covering
+    the next ~3 weeks (*BKG-3WK*.xls, every TRAN DT from today on) - together
+    they cover the same ground the old single BKG+PD.xls file did. A BK No
+    appearing in more than one file (seen rarely, e.g. a rescheduled pickup)
+    keeps the version from whichever file was passed LAST."""
+    frames = [load_booking(p) for p in paths]
+    df = pd.concat(frames, ignore_index=True) if len(frames) > 1 else frames[0]
+    dupes = df.loc[df["BK No"].duplicated(keep=False), "BK No"].unique()
+    if len(dupes):
+        print(f"  NOTE: {len(dupes)} BK No appear in more than one booking file - "
+              f"keeping the later file's version: {list(dupes)[:5]}")
+        df = df.drop_duplicates(subset="BK No", keep="last")
+    return df
+
+
 def load_staying(path):
     df = load_data_sheet(path, header=0)
     return df[df["Location"].notna()].copy()
@@ -300,10 +318,12 @@ def hide_zero_format(ws, row, col_letters):
         ws[f"{col}{row}"].number_format = ZERO_HIDE_FORMAT
 
 
-def build(actual_path, bkg_path, staying_path, report_date, out_path, ep2_path=None):
+def build(actual_path, bkg_paths, staying_path, report_date, out_path, ep2_path=None):
+    if isinstance(bkg_paths, str):
+        bkg_paths = [bkg_paths]
     actual = load_actual(actual_path)
     stay = load_staying(staying_path)
-    bkg = load_booking(bkg_path)
+    bkg = load_booking_all(bkg_paths)
     ep2 = load_ep2(ep2_path) if ep2_path else None
 
     monday = report_date - dt.timedelta(days=report_date.weekday())
@@ -681,14 +701,27 @@ def _sniff_role(path):
 
 
 def _autodetect():
-    found = {"actual": None, "bkg": None, "staying": None, "ep2": None}
+    """bkg is a LIST - the booking/pickup export sometimes comes split across more
+    than one file (backlog view + forward view, see load_booking_all); every
+    matching candidate is collected and later combined, not just the newest.
+
+    That makes it essential to first narrow the candidate pool down to today's
+    upload batch (same calendar day as the most-recently-modified file in the
+    folder) - otherwise a stale BKG+PD.xls left over from a previous day would
+    get swept in alongside the current one and double-count old bookings."""
+    found = {"actual": None, "bkg": [], "staying": None, "ep2": None}
     cand = glob.glob(os.path.join(HERE, "*.xls")) + glob.glob(os.path.join(HERE, "*.xlsx"))
-    cand.sort(key=os.path.getmtime, reverse=True)   # newest upload wins
+    cand = [f for f in cand
+            if "STOCK HQ" not in os.path.basename(f).upper()
+            and not os.path.basename(f).upper().startswith("(HAL)")]
+    if not cand:
+        return found
+    cand.sort(key=os.path.getmtime, reverse=True)   # newest upload wins (for the single-file roles)
+    latest_day = dt.date.fromtimestamp(os.path.getmtime(cand[0]))
+    cand = [f for f in cand if dt.date.fromtimestamp(os.path.getmtime(f)) == latest_day]
     unclaimed = []
     for f in cand:
         name = os.path.basename(f).upper()
-        if "STOCK HQ" in name or name.startswith("(HAL)"):
-            continue
         if "ACTUAL" in name:
             found["actual"] = found["actual"] or f
         elif "STAY" in name:
@@ -696,15 +729,15 @@ def _autodetect():
         elif "EP2" in name or "EMPTY" in name:
             found["ep2"] = found["ep2"] or f
         elif "BKG" in name or "BKGPD" in name or "PD" in name or "PENDING" in name:
-            found["bkg"] = found["bkg"] or f
+            found["bkg"].append(f)
         else:
             unclaimed.append(f)
     for f in unclaimed:                              # content sniff, name-based pass found nothing
         if found["bkg"] and found["ep2"]:
             break
         role = _sniff_role(f)
-        if role == "bkg" and not found["bkg"]:
-            found["bkg"] = f
+        if role == "bkg":
+            found["bkg"].append(f)
         elif role == "ep2" and not found["ep2"]:
             found["ep2"] = f
     return found
@@ -713,7 +746,10 @@ def _autodetect():
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Build the HAL Stock HQ daily report.")
     ap.add_argument("date", nargs="?", help="report date YYYY-MM-DD (default: today)")
-    ap.add_argument("--actual"); ap.add_argument("--bkg"); ap.add_argument("--staying")
+    ap.add_argument("--actual"); ap.add_argument("--staying")
+    ap.add_argument("--bkg", action="append",
+                    help="booking/pickup file - repeat if the export is split "
+                         "(e.g. --bkg backlog.xlsx --bkg forward.xls)")
     ap.add_argument("--ep2", help="optional P.O.D file for the REPO (E/P) row (row 14)")
     ap.add_argument("--date", dest="date_opt")
     ap.add_argument("--out")
@@ -725,7 +761,7 @@ def main(argv=None):
 
     det = _autodetect()
     actual = a.actual or det["actual"]
-    bkg = a.bkg or det["bkg"]
+    bkg = a.bkg or det["bkg"]          # list - one or more booking/pickup files
     staying = a.staying or det["staying"]
     ep2 = a.ep2 or det["ep2"]          # optional - a day with no EP2 file just skips row 14
     missing = [n for n, v in (("ACTUAL", actual), ("BKG+PD", bkg), ("STAYING", staying)) if not v]
@@ -741,7 +777,7 @@ def main(argv=None):
 
     print("Sources:")
     print("  ACTUAL :", os.path.basename(actual))
-    print("  BKG+PD :", os.path.basename(bkg))
+    print("  BKG+PD :", ", ".join(os.path.basename(p) for p in bkg))
     print("  STAYING:", os.path.basename(staying))
     print("  EP2    :", os.path.basename(ep2) if ep2 else "(none - REPO (E/P) row left blank)")
     build(actual, bkg, staying, report_date, out, ep2_path=ep2)
