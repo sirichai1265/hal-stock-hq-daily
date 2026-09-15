@@ -3,7 +3,7 @@ HAL Stock HQ - Daily report builder.
 
 Reads the three same-day source files and fills the Daily sheet (plus the
 RF SEASONAL rows and the NEW FORMAT zero-hiding / balance colours) of the
-template workbook, producing  "HAL Stock HQ - Daily <YYYY-MM-DD>.xlsx".
+template workbook, producing  "Stock Daily <YYYY-MM-DD>.xlsx".
 
 Usage:
     python build_stock_hq.py                     # auto-detect the 3 files, report date = today
@@ -82,8 +82,8 @@ BKG_TYPE_COL = {
 }
 
 # RF SEASONAL sheet
-RF_SEASONAL_YEARS = [2025, 2023, 2021, 2020]
-RF_SEASONAL_YEAR_ROW = {2025: 4, 2023: 5, 2021: 6, 2020: 7}
+RF_SEASONAL_YEARS = [2026, 2025, 2024, 2023, 2022, 2021, 2020]
+RF_SEASONAL_YEAR_ROW = {2026: 4, 2025: 5, 2024: 6, 2023: 7, 2022: 8, 2021: 9, 2020: 10}
 RF_BRAND_TO_COL = {"CARRIER": "CARRIER", "DAIKIN": "DAIKIN", "THERMOKING": "TRMK", "TRMK": "TRMK"}
 RF_COL = {
     "BKK": {"CARRIER": "B", "DAIKIN": "C", "TRMK": "D"},
@@ -585,7 +585,7 @@ def write_dashboard(path, report_date, wk1_lbl, wk2_lbl,
             alerts.append("<li><b>NEW FORMAT balance " + side + "</b>: "
                           + ", ".join(f"{t} {v}" for t, v in neg.items()) + "</li>")
     alert_html = ("<ul>" + "".join(alerts) + "</ul>") if alerts else \
-        '<p class="ok">ไม่มีช่อง STOCK END WK ติดลบ</p>'
+        '<p class="ok">ไม่มีช่อง STOCK BALANCE END WK ติดลบ</p>'
 
     def metric(title, data, neg_ok=False, extra=None):
         extra = extra or {"BKK": None, "LCH": None}
@@ -602,8 +602,8 @@ def write_dashboard(path, report_date, wk1_lbl, wk2_lbl,
         + metric("CURRENT STOCK", cs, extra=repo_extra)
         + metric(f"BOOKING &nbsp;{wk1_lbl}", bk1)
         + metric(f"BOOKING &nbsp;{wk2_lbl}", bk2)
-        + metric(f"STOCK END WK &nbsp;{wk1_lbl}", sew1, neg_ok=True)
-        + metric(f"STOCK END WK &nbsp;{wk2_lbl}", sew2, neg_ok=True)
+        + metric(f"STOCK BALANCE END WK &nbsp;{wk1_lbl}", sew1, neg_ok=True)
+        + metric(f"STOCK BALANCE END WK &nbsp;{wk2_lbl}", sew2, neg_ok=True)
     )
 
     # RF SEASONAL mini-table
@@ -632,14 +632,11 @@ def write_dashboard(path, report_date, wk1_lbl, wk2_lbl,
 <img src="logo.png" alt="logo">
 </div>
 <div class="meta">
-<span>WK 1ST: <b>{wk1_lbl}</b></span>
-<span>WK 2ND: <b>{wk2_lbl}</b></span>
-<span>Excel: <b>{xlsx_name}</b></span>
 <span>สร้างเมื่อ <b>{dt.datetime.now():%Y-%m-%d %H:%M}</b></span>
 </div>
 {sections_html}
 {rf_html}
-<div class="alert"><h2>&#9888; ช่อง STOCK END WK ที่ติดลบ</h2>{alert_html}</div>
+<div class="alert"><h2>&#9888; ช่อง STOCK BALANCE END WK ที่ติดลบ</h2>{alert_html}</div>
 <footer>สร้างอัตโนมัติจาก build_stock_hq.py &middot; ตัวเลขเป็นยอดรวมรายกลุ่มสถานที่ (ไม่มีชื่อลูกค้า/เลขบุ๊คกิ้ง)</footer>
 </div></body></html>"""
     with open(path, "w", encoding="utf-8") as fh:
@@ -713,6 +710,7 @@ def _autodetect():
     cand = glob.glob(os.path.join(HERE, "*.xls")) + glob.glob(os.path.join(HERE, "*.xlsx"))
     cand = [f for f in cand
             if "STOCK HQ" not in os.path.basename(f).upper()
+            and "STOCK DAILY" not in os.path.basename(f).upper()
             and not os.path.basename(f).upper().startswith("(HAL)")]
     if not cand:
         return found
@@ -773,7 +771,7 @@ def main(argv=None):
     report_date = (dt.datetime.strptime(date_str, "%Y-%m-%d").date()
                    if date_str else dt.date.today())
 
-    out = a.out or os.path.join(HERE, f"HAL Stock HQ - Daily {report_date:%Y-%m-%d}.xlsx")
+    out = a.out or os.path.join(HERE, f"Stock Daily {report_date:%Y-%m-%d}.xlsx")
 
     print("Sources:")
     print("  ACTUAL :", os.path.basename(actual))

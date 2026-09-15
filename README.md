@@ -31,7 +31,7 @@ https://sirichai1265.github.io/hal-stock-hq-dashboard/
 | `*EP2*.xls` (ไม่บังคับ) | REPO (E/P) แถว 14 — รวมตามชนิดตู้จากคอลัมน์ P.O.D (THBKK/THLCH) วันไหนไม่มีไฟล์นี้ แถว 14 จะเว้นว่างไว้ |
 
 ผลลัพธ์:
-- `HAL Stock HQ - Daily <YYYY-MM-DD>.xlsx` — ไฟล์รายงาน
+- `Stock Daily <YYYY-MM-DD>.xlsx` — ไฟล์รายงาน
 - `index.html` — dashboard (ยอดรวมรายกลุ่มสถานที่เท่านั้น ไม่มีชื่อลูกค้า/เลขบุ๊คกิ้ง)
 
 ## นิยาม
