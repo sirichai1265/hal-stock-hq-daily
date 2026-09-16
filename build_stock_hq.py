@@ -785,10 +785,11 @@ def recalc(path):
 #  File auto-detection / CLI                                                    #
 # --------------------------------------------------------------------------- #
 def _sniff_role(path):
-    """Fallback for a file whose name matches none of the keywords below - peek at its
-    columns instead. Only used for the roles that have already changed name once
-    (bkg: BKG+PD -> *PENDING*; ep2: EP2 -> EMPTY), since ACTUAL/STAYING share an
-    identical column set and can only be told apart by name."""
+    """Fallback for a file whose name matches none of the keywords below (or was
+    misspelled, e.g. 9-16-ATCUAL.xls) - peek at its columns instead. ACTUAL and
+    STAYING share an identical column set, so they're told apart by Full/Empty:
+    ACTUAL is always a snapshot of FULL containers only (every row 'F'), while
+    STAYING is the empty-stock snapshot (every row 'E')."""
     try:
         for header in (0, 1):
             df = load_data_sheet(path, header=header)
@@ -797,6 +798,12 @@ def _sniff_role(path):
                 return "bkg"
             if "P.O.D" in cols and "BK No" not in cols:
                 return "ep2"
+            if {"Move Code", "Size/Type", "Full/Empty", "Location"} <= cols:
+                fe = df["Full/Empty"].dropna().astype(str).str.upper()
+                if len(fe) and (fe == "F").all():
+                    return "actual"
+                if len(fe):
+                    return "staying"
     except Exception:
         pass
     return None
@@ -825,7 +832,7 @@ def _autodetect():
     unclaimed = []
     for f in cand:
         name = os.path.basename(f).upper()
-        if "ACTUAL" in name:
+        if "ACTUAL" in name or "ATCUAL" in name:  # ATCUAL: seen typo'd 2026-09-16
             found["actual"] = found["actual"] or f
         elif "STAY" in name:
             found["staying"] = found["staying"] or f
@@ -836,13 +843,17 @@ def _autodetect():
         else:
             unclaimed.append(f)
     for f in unclaimed:                              # content sniff, name-based pass found nothing
-        if found["bkg"] and found["ep2"]:
+        if found["bkg"] and found["ep2"] and found["actual"] and found["staying"]:
             break
         role = _sniff_role(f)
         if role == "bkg":
             found["bkg"].append(f)
         elif role == "ep2" and not found["ep2"]:
             found["ep2"] = f
+        elif role == "actual" and not found["actual"]:
+            found["actual"] = f
+        elif role == "staying" and not found["staying"]:
+            found["staying"] = f
     return found
 
 
