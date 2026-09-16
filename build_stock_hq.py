@@ -501,14 +501,8 @@ background:var(--card);border:1px solid var(--line);border-radius:14px;
 padding:18px 24px;margin:0 0 18px;box-shadow:0 3px 10px rgba(16,24,40,.06)}
 .topbar-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
 .topbar img{height:46px;width:auto;object-fit:contain}
-.live-clock{text-align:right;line-height:1.35}
-.live-clock .lc-date{font-size:11.5px;color:var(--mut);white-space:nowrap}
-.live-clock .lc-time{font-size:15px;font-weight:700;color:var(--head);font-variant-numeric:tabular-nums;white-space:nowrap}
 h1{font-size:21px;margin:0 0 2px;color:var(--head)}.sub{color:var(--mut);margin:0}
-.meta{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 16px;font-size:12.5px;color:var(--mut)}
-.meta span{background:var(--card);border:1px solid var(--line);padding:5px 12px;border-radius:8px}
-.meta b{color:var(--ink)}
-.filter-bar{display:flex;gap:8px;margin:0 0 24px}
+.filter-bar{display:flex;gap:8px;margin:0 0 20px}
 .filter-btn{cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--mut);
 font-size:12.5px;font-weight:700;letter-spacing:.03em;padding:7px 18px;border-radius:999px;transition:all .15s}
 .filter-btn:hover{border-color:var(--accent);color:var(--head)}
@@ -622,24 +616,6 @@ def _msection(title, bkk_card, lch_card):
 
 def write_dashboard(path, report_date, wk1_lbl, wk2_lbl,
                     fi, cs, bk1, bk2, sew1, sew2, bal, rf, repo, xlsx_name):
-    alerts = []
-    for wk, sew in (("WK1", sew1), ("WK2", sew2)):
-        for g in list(BKK_GROUPS) + list(LCH_GROUPS):
-            side = "BKK" if g in BKK_GROUPS else "LCH"
-            for t in TEMPLATE_TYPES:
-                v = sew[g][t]
-                if v < 0:
-                    alerts.append(f"<li><b>{side} / {g} / {t}</b> ({wk}): "
-                                  f"<span style='color:var(--neg);font-weight:700'>{v}</span> "
-                                  f"&mdash; {neg_note(g, t, v, fi)}</li>")
-    for side in ("BKK", "LCH"):
-        neg = {t: v for t, v in bal[side].items() if v < 0}
-        if neg:
-            alerts.append("<li><b>NEW FORMAT balance " + side + "</b>: "
-                          + ", ".join(f"{t} {v}" for t, v in neg.items()) + "</li>")
-    alert_html = ("<ul>" + "".join(alerts) + "</ul>") if alerts else \
-        '<p class="ok">ไม่มีช่อง STOCK BALANCE END WK ติดลบ</p>'
-
     repo_extra = {
         "BKK": [("REPO (E/P)", _empty_counts(), repo["BKK"], True)],
         "LCH": [("REPO (E/P)", _empty_counts(), repo["LCH"], True)],
@@ -692,11 +668,7 @@ def write_dashboard(path, report_date, wk1_lbl, wk2_lbl,
 <p class="sub">รายงานประจำวันที่ {report_date:%d/%m/%Y} ({report_date:%A})</p></div>
 <div class="topbar-right">
 <img src="logo.png" alt="logo">
-<div id="liveClock" class="live-clock"><span class="lc-date">&nbsp;</span><span class="lc-time">&nbsp;</span></div>
 </div>
-</div>
-<div class="meta">
-<span>สร้างเมื่อ <b>{dt.datetime.now():%Y-%m-%d %H:%M}</b></span>
 </div>
 <div class="filter-bar">
 <button type="button" class="filter-btn active" data-filter="all">ALL</button>
@@ -705,22 +677,9 @@ def write_dashboard(path, report_date, wk1_lbl, wk2_lbl,
 </div>
 {sections_html}
 {rf_html}
-<div class="alert"><h2>&#9888; ช่อง STOCK BALANCE END WK ที่ติดลบ</h2>{alert_html}</div>
 <footer>สร้างอัตโนมัติจาก build_stock_hq.py &middot; ตัวเลขเป็นยอดรวมรายกลุ่มสถานที่ (ไม่มีชื่อลูกค้า/เลขบุ๊คกิ้ง)</footer>
 </div>
 <script>
-(function(){{
-  var dateEl = document.querySelector('#liveClock .lc-date');
-  var timeEl = document.querySelector('#liveClock .lc-time');
-  var dateFmt = new Intl.DateTimeFormat('en-US', {{weekday:'long', year:'numeric', month:'long', day:'numeric'}});
-  function tick(){{
-    var now = new Date();
-    dateEl.textContent = dateFmt.format(now);
-    timeEl.textContent = now.toLocaleTimeString('en-US', {{hour12:false}});
-  }}
-  tick();
-  setInterval(tick, 1000);
-}})();
 (function(){{
   var buttons = Array.prototype.slice.call(document.querySelectorAll('.filter-btn'));
   var bkkCards = document.querySelectorAll('.card.bkk');
