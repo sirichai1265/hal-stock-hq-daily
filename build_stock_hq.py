@@ -331,10 +331,18 @@ def build(actual_path, bkg_paths, staying_path, report_date, out_path, ep2_path=
     next_monday = monday + dt.timedelta(days=7)
     next_sunday = next_monday + dt.timedelta(days=6)
 
+    # Friday: WK1ST would only span Fri-Sun (3 days) - too short to stand alone, so
+    # merge it with WK2ND into one combined backlog-through-next-Sunday window.
+    # WK2ND then comes out all zero/blank (its bookings already counted in WK1ST) -
+    # per sirichai 2026-09-18.
+    merge_weeks = report_date.weekday() == 4   # Monday=0 .. Friday=4
+    wk1_hi = next_sunday if merge_weeks else sunday
+
     fi = full_inbound(actual)
     cs = current_stock(stay)
-    bk1 = booking(bkg, None, sunday)                       # TODAY+WK1ST: no lower bound
-    bk2 = booking(bkg, next_monday, next_sunday)           # WK2ND
+    bk1 = booking(bkg, None, wk1_hi)                       # TODAY+WK1ST: no lower bound
+    bk2 = ({g: _empty_counts() for g in GROUP_CODES} if merge_weeks
+           else booking(bkg, next_monday, next_sunday))    # WK2ND
     rf = rf_seasonal_counts(stay)
     repo = repo_ep_totals(ep2)                              # REPO (E/P), row 14 - optional EP2 file
 
@@ -386,7 +394,7 @@ def build(actual_path, bkg_paths, staying_path, report_date, out_path, ep2_path=
     ws["AM2"].number_format = "d/m/yyyy"
 
     # bare date-range labels (no "TODAY+WK 1ST" / "WK 2ND" text)
-    wk1_lbl = fmt_range(report_date, sunday)
+    wk1_lbl = fmt_range(report_date, wk1_hi)               # spans both weeks when merged
     wk2_lbl = fmt_range(next_monday, next_sunday)
     ws["I29"] = ws["AD29"] = wk1_lbl
     ws["I43"] = ws["AD43"] = wk2_lbl
@@ -437,8 +445,10 @@ def build(actual_path, bkg_paths, staying_path, report_date, out_path, ep2_path=
 
     # ---- console report -------------------------------------------------- #
     print(f"\nReport date : {report_date:%Y-%m-%d} ({report_date:%A})")
-    print(f"WK 1ST      : {wk1_lbl}   (TRAN DT <= {sunday:%d/%m})")
-    print(f"WK 2ND      : {wk2_lbl}   ({next_monday:%d/%m} .. {next_sunday:%d/%m})")
+    print(f"WK 1ST      : {wk1_lbl}   (TRAN DT <= {wk1_hi:%d/%m}"
+          f"{'  -- merged with WK2ND (Friday)' if merge_weeks else ''})")
+    print(f"WK 2ND      : {wk2_lbl}   "
+          f"({'merged into WK1ST above, blank' if merge_weeks else f'{next_monday:%d/%m} .. {next_sunday:%d/%m}'})")
     print(f"Saved       : {os.path.basename(out_path)}")
 
     report_negatives("WK1ST", sew1, fi)
