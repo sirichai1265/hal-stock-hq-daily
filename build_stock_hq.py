@@ -257,17 +257,29 @@ def rf_seasonal_counts(stay):
 
 
 def repo_ep_totals(ep2):
-    """REPO (E/P) row: EP2 rows summed by P.O.D (THBKK/THLCH) x container type.
-    ep2=None (no file that day) -> all zeros, row 14 just stays blank."""
+    """REPO (E/P) row: EP2/EMPTY rows summed by P.O.D (THBKK/THLCH) x container type.
+    ep2=None (no file that day) -> all zeros, row 14 just stays blank.
+
+    Two schema variants seen so far (same "match by content" rule as load_booking):
+    - the original: one row per vessel/voyage, with container-type COUNT columns
+      (22GP, 42GP, ...) already matching TEMPLATE_TYPES 1:1.
+    - since 2026-09-18: one row per CONTAINER, with a 'Type Size' column holding
+      the type as text (e.g. '22GP') - count rows instead of summing columns."""
     out = {"BKK": _empty_counts(), "LCH": _empty_counts()}
     if ep2 is None:
         return out
     pod_side = {"THBKK": "BKK", "THLCH": "LCH"}
+    per_container = "Type Size" in ep2.columns and not any(t in ep2.columns for t in TEMPLATE_TYPES)
     for pod, side in pod_side.items():
         sub = ep2[ep2["P.O.D"] == pod]
-        for t in TEMPLATE_TYPES:
-            if t in sub.columns:
-                out[side][t] = int(pd.to_numeric(sub[t], errors="coerce").fillna(0).sum())
+        if per_container:
+            for t, n in sub["Type Size"].value_counts().items():
+                if t in out[side]:
+                    out[side][t] = int(n)
+        else:
+            for t in TEMPLATE_TYPES:
+                if t in sub.columns:
+                    out[side][t] = int(pd.to_numeric(sub[t], errors="coerce").fillna(0).sum())
     unknown = sorted(set(ep2["P.O.D"].astype(str)) - set(pod_side))
     if unknown:
         print(f"  WARNING: EP2 - unmapped P.O.D value(s) {unknown}, not counted in REPO (E/P)")
