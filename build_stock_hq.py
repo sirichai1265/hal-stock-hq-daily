@@ -524,7 +524,8 @@ font:14px/1.5 -apple-system,Segoe UI,Roboto,"Noto Sans Thai",sans-serif}
 .accent-bar{height:5px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
 .wrap{max-width:1180px;margin:0 auto;padding:24px 20px 60px}
 .topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;
-background:var(--card);border:1px solid var(--line);border-radius:14px;
+background:linear-gradient(rgba(255,255,255,.88),rgba(255,255,255,.88)),url('header.jpg') center/cover;
+border:1px solid var(--line);border-radius:14px;
 padding:18px 24px;margin:0 0 18px;box-shadow:0 3px 10px rgba(16,24,40,.06)}
 .topbar-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
 .topbar img{height:46px;width:auto;object-fit:contain}
