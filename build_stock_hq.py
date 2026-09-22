@@ -416,13 +416,15 @@ def build(actual_path, bkg_paths, staying_path, report_date, out_path, ep2_path=
     ws["I29"] = ws["AD29"] = wk1_lbl
     ws["I43"] = ws["AD43"] = wk2_lbl
 
-    # --- RF SEASONAL rows 4-7 (row 8 TOTAL formula untouched) ---
+    # --- RF SEASONAL rows 4-10 (row 11 TOTAL formula untouched) ---
+    # Unlike Daily/dashboard, always write the real count including 0 - years with
+    # zero 45RE units (e.g. 2022/2024/2026 having none in current stock) still need
+    # to show as a visible "0" row, not disappear, per sirichai 2026-09-22.
     rfs = wb["RF SEASONAL"]
     for area in ("BKK", "LCH"):
         for year, row in RF_SEASONAL_YEAR_ROW.items():
             for brand, col in RF_COL[area].items():
-                n = rf[(area, year, brand)]
-                rfs[f"{col}{row}"] = n if n != 0 else None
+                rfs[f"{col}{row}"] = rf[(area, year, brand)]
 
     # --- NEW FORMAT: hide single 0s (except Current Stock + Balance) ---
     nf = wb["NEW FORMAT"]
@@ -677,8 +679,8 @@ def write_dashboard(path, report_date, wk1_lbl, wk2_lbl,
         b = [rf[("BKK", y, c)] for c in ("CARRIER", "DAIKIN", "TRMK")]
         l = [rf[("LCH", y, c)] for c in ("CARRIER", "DAIKIN", "TRMK")]
         rf_rows.append("<tr><td>{}</td>{}{}</tr>".format(
-            y, "".join(f"<td>{x or ''}</td>" for x in b),
-            "".join(f"<td>{x or ''}</td>" for x in l)))
+            y, "".join(f"<td>{x}</td>" for x in b),
+            "".join(f"<td>{x}</td>" for x in l)))
     rf_html = (
         "<div class='card' style='margin-top:22px'><h3>RF SEASONAL &mdash; 45RE by year built</h3>"
         "<table><thead><tr><th>Year</th><th>BKK CAR</th><th>BKK DAI</th><th>BKK TRMK</th>"
