@@ -689,12 +689,12 @@ def write_dashboard(path, report_date, wk1_lbl, wk2_lbl,
 
     html = f"""<!doctype html><html lang="th"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>HAL Stock HQ &ndash; Daily {report_date:%Y-%m-%d}</title>
+<title>Stock Report HQ &ndash; {report_date:%Y-%m-%d}</title>
 <style>{DASH_CSS}</style></head><body>
 <div class="accent-bar"></div>
 <div class="wrap">
 <div class="topbar">
-<div><h1>HAL Stock HQ &ndash; Daily Container Stock</h1>
+<div><h1>Stock Report HQ</h1>
 <p class="sub">รายงานประจำวันที่ {report_date:%d/%m/%Y} ({report_date:%A})</p></div>
 <div class="topbar-right">
 <img src="logo.png" alt="logo">
