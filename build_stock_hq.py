@@ -432,9 +432,9 @@ def build(actual_path, bkg_paths, staying_path, report_date, out_path, ep2_path=
     # row 29 block = WK1ST, row 43 block = WK2ND
     for row, wk in ((29, "WK1ST"), (43, "WK2ND")):
         ws[f"C{row}"] = f"BOOKING (BKK) {wk}"
-        ws[f"L{row}"] = f"STOCK BALANCE END WK (BKK) {wk}"
+        ws[f"L{row}"] = f"STOCK BALANCE END (BKK) {wk}"
         ws[f"X{row}"] = f"BOOKING (LCH) {wk}"
-        ws[f"AG{row}"] = f"STOCK BALANCE END WK (LCH) {wk}"
+        ws[f"AG{row}"] = f"STOCK BALANCE END (LCH) {wk}"
     ws["I29"] = ws["AD29"] = wk1_lbl
     ws["I43"] = ws["AD43"] = wk2_lbl
 
