@@ -72,6 +72,10 @@ LCH_BKG_ROW_WK2 = {g: r + 14 for g, r in LCH_BKG_ROW_WK1.items()}   # 45-51
 
 BKK_GROUPS = ["PAT", "UNITHAI", "ESCO #2", "BMTP", "SMART", "BC2"]
 LCH_GROUPS = ["LCMT", "ESCO", "LCIT", "HPT", "HAST", "CELLO", "PW"]
+# LCH terminal groups whose empty-container STOCK BALANCE END WK cells are left
+# blank in the Excel (formulas removed, so the block TOTAL excludes them too) -
+# per sirichai 2026-10-05.
+NO_BALANCE_GROUPS = {"LCMT", "ESCO", "LCIT", "HPT"}
 
 # BKG+PD container-count column -> template type
 BKG_TYPE_COL = {
@@ -325,6 +329,11 @@ def style_negative(ws, row, col_letters, computed):
             c.fill = PINK_FILL
 
 
+def clear_row(ws, row, col_letters):
+    for col in col_letters:
+        ws[f"{col}{row}"] = None
+
+
 def hide_zero_format(ws, row, col_letters):
     for col in col_letters:
         ws[f"{col}{row}"].number_format = ZERO_HIDE_FORMAT
@@ -388,12 +397,18 @@ def build(actual_path, bkg_paths, staying_path, report_date, out_path, ep2_path=
             write_row(ws, r1[g], cin, bk1[g])
             colour_row(ws, r1[g], cin, g)
             colour_row(ws, r1[g], cstock, g)
-            style_negative(ws, r1[g], cstock, sew1[g])
+            if g in NO_BALANCE_GROUPS:
+                clear_row(ws, r1[g], cstock)
+            else:
+                style_negative(ws, r1[g], cstock, sew1[g])
             # BOOKING wk2 (rows 45-50/45-51) + its STOCK END WK formula cells
             write_row(ws, r2[g], cin, bk2[g])
             colour_row(ws, r2[g], cin, g)
             colour_row(ws, r2[g], cstock, g)
-            style_negative(ws, r2[g], cstock, sew2[g])
+            if g in NO_BALANCE_GROUPS:
+                clear_row(ws, r2[g], cstock)
+            else:
+                style_negative(ws, r2[g], cstock, sew2[g])
 
     # REPO (E/P) row 14 - not tied to a location group, so no colour_row() call;
     # the template already carries its own preset font colour on this row.
