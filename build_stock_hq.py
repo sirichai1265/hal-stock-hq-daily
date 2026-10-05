@@ -413,6 +413,13 @@ def build(actual_path, bkg_paths, staying_path, report_date, out_path, ep2_path=
     # bare date-range labels (no "TODAY+WK 1ST" / "WK 2ND" text)
     wk1_lbl = fmt_range(report_date, wk1_hi)               # spans both weeks when merged
     wk2_lbl = fmt_range(wk2_lo, wk2_hi)                     # WK2ND, or WK3RD on Fridays
+    # block headers carry their week slot as a suffix (per sirichai 2026-10-05):
+    # row 29 block = WK1ST, row 43 block = WK2ND
+    for row, wk in ((29, "WK1ST"), (43, "WK2ND")):
+        ws[f"C{row}"] = f"BOOKING (BKK) {wk}"
+        ws[f"L{row}"] = f"STOCK BALANCE END WK (BKK) {wk}"
+        ws[f"X{row}"] = f"BOOKING (LCH) {wk}"
+        ws[f"AG{row}"] = f"STOCK BALANCE END WK (LCH) {wk}"
     ws["I29"] = ws["AD29"] = wk1_lbl
     ws["I43"] = ws["AD43"] = wk2_lbl
 
