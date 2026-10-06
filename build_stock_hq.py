@@ -454,7 +454,7 @@ def build(actual_path, bkg_paths, staying_path, report_date, out_path, ep2_path=
         for col in NF_COLS:
             nf[f"{col}{row}"].number_format = ZERO_HIDE_FORMAT
 
-    # NEW FORMAT Balance colour: red iff genuinely negative, else blue.
+    # NEW FORMAT Balance colour: red when zero or negative (<= 0, per sirichai 2026-10-06), else blue.
     # Balance = CURRENT STOCK total (incl. REPO E/P row 14, like Daily!L15/AG15) +
     #           FULL INBOUND total - BOOKING wk1 total - BOOKING wk2 total
     bal = {
@@ -469,7 +469,7 @@ def build(actual_path, bkg_paths, staying_path, report_date, out_path, ep2_path=
         for col, t in zip("CDEFGHIJK", TEMPLATE_TYPES):
             cell = nf[f"{col}{row}"]
             f = cell.font
-            cell.font = Font(color=RED if bal[side][t] < 0 else BLUE,
+            cell.font = Font(color=RED if bal[side][t] <= 0 else BLUE,
                              bold=f.bold, name=f.name, size=f.size, italic=f.italic)
 
     wb.calculation.fullCalcOnLoad = True
