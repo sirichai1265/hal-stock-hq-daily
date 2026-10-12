@@ -1,49 +1,46 @@
-# HAL Stock HQ – Daily Container Stock
+# Stock Report HQ – Stock Daily
 
-สร้างรายงาน **HAL Stock HQ – Daily** จากไฟล์ export 3 ไฟล์ประจำวัน แล้วเติมลงเทมเพลต
+สร้างรายงาน **Stock Daily** จากไฟล์ export ประจำวัน แล้วเติมลงเทมเพลต
 `(HAL)Stock form.xlsx` (ชีต `Daily`, `RF SEASONAL`, `NEW FORMAT`) พร้อมสร้างหน้า
-dashboard `index.html` สำหรับ GitHub Pages
+dashboard `index.html` (หัวเรื่อง "Stock Report HQ") สำหรับ GitHub Pages
+
+> คู่มือ prompt สำหรับสอนคนอื่นใช้งาน: ดูไฟล์ **`PROMPT-ใช้งาน.md`**
 
 ## ใช้งาน (ประจำวัน)
 
-1. วางไฟล์ export ของวันนั้น 3 ไฟล์ (`*ACTUAL*.xls`, `*STAYING*.xls`, `*BKG*.xls`) ลงในโฟลเดอร์นี้
+1. วางไฟล์ export ของวันนั้นลงในโฟลเดอร์นี้ (ดูตารางด้านล่าง)
 2. ดับเบิลคลิก **`run_stock_hq.bat`** — หรือรันเอง:
 
 ```bash
-python build_stock_hq.py --publish             # ไม่ใส่วันที่ = ใช้วันนี้
-python build_stock_hq.py 2026-09-10 --publish  # ระบุวันที่เอง
-python build_stock_hq.py 2026-09-10            # สร้างรายงานอย่างเดียว ไม่ push dashboard
+python build_stock_hq.py                       # ไม่ใส่วันที่ = ใช้วันนี้
+python build_stock_hq.py 2026-10-12            # ระบุวันที่เอง
+python build_stock_hq.py --publish             # + push dashboard ขึ้น GitHub Pages
 ```
 
-ไม่ต้องลบไฟล์เก่าออกก่อน — สคริปต์เลือกไฟล์ที่ **อัปโหลดล่าสุด** (เรียงตามเวลาแก้ไขไฟล์) ของแต่ละประเภทให้เอง
-
-`--publish` จะ copy `index.html` ไปที่ `dashboard-public/` (local clone ของ repo
-public `hal-stock-hq-dashboard`) แล้ว commit + push → อัปเดต
-https://sirichai1265.github.io/hal-stock-hq-dashboard/
-
-วางไฟล์ 3 ไฟล์ไว้ในโฟลเดอร์เดียวกัน สคริปต์ auto-detect จากชื่อ:
+สคริปต์หาไฟล์ให้เองจากชื่อ/เนื้อหา และใช้เฉพาะไฟล์ชุดที่อัปโหลดวันล่าสุด (ไม่ต้องลบไฟล์เก่าออก)
 
 | ไฟล์ | ใช้คำนวณ |
 |---|---|
 | `*ACTUAL*.xls` | FULL INBOUND (ตู้ FULL คงเหลือ, Move Code ≠ OFD) |
 | `*STAYING*.xls` | CURRENT STOCK + RF SEASONAL |
-| `*BKG*.xls` | BOOKING WK1ST / WK2ND |
-| `*EP2*.xls` (ไม่บังคับ) | REPO (E/P) แถว 14 — รวมตามชนิดตู้จากคอลัมน์ P.O.D (THBKK/THLCH) วันไหนไม่มีไฟล์นี้ แถว 14 จะเว้นว่างไว้ |
+| `*PENDING*.xls` + `*BKG*.xls` | BOOKING (รวมสองไฟล์ ถ้ามีไฟล์เดียวก็ใช้ไฟล์เดียว) |
+| `*EMPTY*.xls` (ไม่บังคับ) | REPO (E/P) แถว 14 — THBKK → L14:T14, THLCH → AG14:AO14 |
 
-ผลลัพธ์:
-- `Stock Daily <YYYY-MM-DD>.xlsx` — ไฟล์รายงาน
-- `index.html` — dashboard (ยอดรวมรายกลุ่มสถานที่เท่านั้น ไม่มีชื่อลูกค้า/เลขบุ๊คกิ้ง)
+ผลลัพธ์: `Stock Daily <YYYY-MM-DD>.xlsx` (รายงาน) และ `index.html` (dashboard — ยอดรวมรายกลุ่มสถานที่ ไม่มีชื่อลูกค้า/เลขบุ๊คกิ้ง)
+
+หลังรันเสร็จ ให้สร้างโฟลเดอร์ของวัน (เช่น `10-13`) แล้วย้ายไฟล์ดิบทั้งหมด + รายงานเข้าไปเก็บ
 
 ## นิยาม
 
-- **WK 1ST** = วันล่าสุด → วันอาทิตย์สัปดาห์แรก (รวม backlog ที่ค้าง)
-- **WK 2ND** = วันจันทร์ → วันอาทิตย์สัปดาห์ที่สอง
-- **STOCK END WK** = CURRENT STOCK − BOOKING (คิดต่อเนื่องข้ามสัปดาห์)
+- **WK1ST** = วันล่าสุด → วันอาทิตย์สัปดาห์นี้ (รวมบุ๊คค้างเก่า ไม่มีขอบล่าง)
+- **WK2ND** = วันจันทร์ → วันอาทิตย์สัปดาห์หน้า
+- **วันศุกร์**: WK1ST รวมถึงอาทิตย์สัปดาห์หน้า และช่องที่สองใช้บุ๊ค WK3RD
+- **STOCK BALANCE END** = CURRENT STOCK − BOOKING (คิดต่อเนื่องข้ามสัปดาห์)
 
 ## หมายเหตุ
 
 - เครื่องที่ไม่มี LibreOffice: สคริปต์ตั้ง `fullCalcOnLoad` ไว้ สูตรจะคำนวณเมื่อเปิดใน Excel
-- ไฟล์ export ดิบ (`*ACTUAL*`, `*STAYING*`, `*BKG*`, `*.docx`) ถูก `.gitignore` ไว้ ไม่ push ขึ้น repo
+- ไฟล์ export ดิบ (`*ACTUAL*`, `*STAYING*`, `*BKG*`, `*PENDING*`, `*EMPTY*`) มีข้อมูลลูกค้า ถูก `.gitignore` ไว้ ห้าม push ขึ้น repo
 
 ## ติดตั้งบนเครื่องใหม่ / ให้เพื่อนใช้
 
@@ -56,7 +53,7 @@ https://sirichai1265.github.io/hal-stock-hq-dashboard/
    ```bash
    pip install -r requirements.txt
    ```
-4. ใช้งานประจำวัน: วางไฟล์ 3 ไฟล์ + ดับเบิลคลิก `run_stock_hq.bat` → ได้ไฟล์ Excel
+4. ใช้งานประจำวัน: วางไฟล์ประจำวัน + ดับเบิลคลิก `run_stock_hq.bat` → ได้ไฟล์ Excel
    (ส่วน `--publish` จะข้ามอัตโนมัติถ้ายังไม่ได้ตั้ง dashboard-public — ดูแบบที่ 2)
 
 **แบบที่ 2 — เชื่อม GitHub ด้วย เพื่ออัปเดต dashboard สาธารณะร่วมกัน**
