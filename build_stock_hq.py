@@ -49,28 +49,33 @@ LCH_COLS_STOCK = ["AG", "AH", "AI", "AJ", "AK", "AL", "AM", "AN", "AO"]  # CURRE
 
 # location group -> (business type, [location codes])
 GROUP_TYPE = {
-    "PAT": "TERMINAL", "UNITHAI": "TERMINAL", "ESCO #2": "ICD", "BMTP": "ICD",
-    "SMART": "DEPOT", "BC2": "DEPOT",
+    "PAT": "TERMINAL", "UNITHAI": "TERMINAL", "ESCO #2": "ICD", "TIFFA": "ICD",
+    "SMART": "DEPOT", "BC2": "DEPOT", "BMTP": "ICD", "SCT": "ICD",
     "LCMT": "TERMINAL", "ESCO": "TERMINAL", "LCIT": "TERMINAL", "HPT": "TERMINAL",
     "HAST": "DEPOT", "CELLO": "DEPOT", "PW": "DEPOT",
 }
 GROUP_CODES = {
     "PAT": ["BKK01", "BKK04"], "UNITHAI": ["BKK02"], "ESCO #2": ["LCH55"],
-    "BMTP": ["BKKY4"], "SMART": ["BKK25"], "BC2": ["BKK27"],
+    "TIFFA": ["LCH54"], "SMART": ["BKK25"], "BC2": ["BKK27"],
+    "BMTP": ["BKKY4"], "SCT": ["LCHY4"],
     "LCMT": ["LCH04", "LCH07"], "ESCO": ["LCH01"], "LCIT": ["LCH05", "LCH10"],
     "HPT": ["LCH02", "LCH06", "LCH08", "LCH09"],
     "HAST": ["LCH27"], "CELLO": ["LCH28"], "PW": ["LCHY5"],
 }
 
 # template row numbers per group
-BKK_STOCK_ROW = {"PAT": 4, "UNITHAI": 5, "ESCO #2": 6, "BMTP": 7, "SMART": 8, "BC2": 9}
+# BKK order (per sirichai 2026-10-12): TIFFA (LCH54) takes BMTP's old slot; BMTP and
+# the new SCT (LCHY4) sit below BC2 in the template's spare rows 10-11.
+BKK_STOCK_ROW = {"PAT": 4, "UNITHAI": 5, "ESCO #2": 6, "TIFFA": 7, "SMART": 8, "BC2": 9,
+                 "BMTP": 10, "SCT": 11}
 LCH_STOCK_ROW = {"LCMT": 4, "ESCO": 5, "LCIT": 6, "HPT": 7, "HAST": 8, "CELLO": 9, "PW": 10}
-BKK_BKG_ROW_WK1 = {"PAT": 31, "UNITHAI": 32, "ESCO #2": 33, "BMTP": 34, "SMART": 35, "BC2": 36}
+BKK_BKG_ROW_WK1 = {"PAT": 31, "UNITHAI": 32, "ESCO #2": 33, "TIFFA": 34, "SMART": 35, "BC2": 36,
+                   "BMTP": 37, "SCT": 38}
 LCH_BKG_ROW_WK1 = {"LCMT": 31, "ESCO": 32, "LCIT": 33, "HPT": 34, "HAST": 35, "CELLO": 36, "PW": 37}
-BKK_BKG_ROW_WK2 = {g: r + 14 for g, r in BKK_BKG_ROW_WK1.items()}   # 45-50
+BKK_BKG_ROW_WK2 = {g: r + 14 for g, r in BKK_BKG_ROW_WK1.items()}   # 45-52
 LCH_BKG_ROW_WK2 = {g: r + 14 for g, r in LCH_BKG_ROW_WK1.items()}   # 45-51
 
-BKK_GROUPS = ["PAT", "UNITHAI", "ESCO #2", "BMTP", "SMART", "BC2"]
+BKK_GROUPS = ["PAT", "UNITHAI", "ESCO #2", "TIFFA", "SMART", "BC2", "BMTP", "SCT"]
 LCH_GROUPS = ["LCMT", "ESCO", "LCIT", "HPT", "HAST", "CELLO", "PW"]
 # LCH terminal groups whose empty-container STOCK BALANCE END WK cells are left
 # blank in the Excel (formulas removed, so the block TOTAL excludes them too) -
