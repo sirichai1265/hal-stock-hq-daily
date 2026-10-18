@@ -490,7 +490,9 @@ def build(actual_path, bkg_paths, staying_path, report_date, out_path, ep2_path=
     write_dashboard(dash, report_date, wk1_lbl, wk2_lbl,
                     fi, cs, bk1, bk2, sew1, sew2, bal, rf, repo,
                     os.path.basename(out_path))
-    print(f"Dashboard   : {os.path.basename(dash)}")
+    write_overview(os.path.join(os.path.dirname(dash), "overview.html"), report_date,
+                   wk1_lbl, wk2_lbl, fi, cs, bk1, bk2, bal, repo)
+    print(f"Dashboard   : {os.path.basename(dash)} + overview.html")
 
     # ---- console report -------------------------------------------------- #
     print(f"\nReport date : {report_date:%Y-%m-%d} ({report_date:%A})")
@@ -846,6 +848,175 @@ def _nf_zone(zone, cs, fi, bk1, bk2, repo_side, bal_side, wk1_lbl, wk2_lbl):
             f"<tr><th>Item</th>{types}</tr></thead><tbody>{body}</tbody></table></div>")
 
 
+OV_CSS = """
+.nav{display:flex;gap:8px;margin:0 0 12px}
+.nav a{text-decoration:none;font-weight:700;font-size:13px;padding:9px 18px;border-radius:999px;
+border:1px solid var(--line);background:#fff;color:var(--mut)}
+.nav a:hover{border-color:var(--bkk);color:var(--navy)}
+.nav a.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.ov-zone{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px 22px;margin:0 0 16px;
+box-shadow:0 5px 16px rgba(15,35,60,.06);border-top:5px solid var(--zc)}
+.ov-zone[data-zone=bkk]{--zc:var(--bkk)}.ov-zone[data-zone=lch]{--zc:var(--lch)}
+.ov-h{display:flex;align-items:baseline;gap:12px;margin:0 0 14px}
+.ov-h h2{margin:0;font-size:22px;color:var(--zc);font-weight:800}
+.ov-h span{color:var(--mut);font-size:13px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:0 0 20px}
+.kpi{border:1px solid var(--line);border-radius:12px;padding:12px 16px;background:#f8fafc}
+.kpi small{display:block;color:var(--mut);font-size:12px;font-weight:600}
+.kpi b{display:block;font-size:30px;line-height:1.15;color:var(--navy);font-weight:800;margin-top:2px}
+.kpi em{font-style:normal;color:var(--mut);font-size:11.5px}
+.kpi.good b{color:#15803d}.kpi.bad b{color:#c81e1e}
+.ov-cols{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:22px}
+@media(max-width:1250px){.ov-cols{grid-template-columns:1fr}}
+.ov-cols>div{min-width:0;overflow-x:auto}
+.gt th,.gt td{padding-left:6px;padding-right:6px}
+.ov-cols h3{margin:0 0 4px;font-size:15px;color:var(--navy)}
+.ov-cols p.hint{margin:0 0 12px;color:var(--mut);font-size:12.5px}
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin:0 0 12px;font-size:12.5px;color:var(--mut)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.c-s{background:#3b82f6}.c-b{background:#f59e0b}.c-p{background:#16a34a}.c-n{background:#dc2626}
+.trow{display:grid;grid-template-columns:92px 1fr;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}
+.trow.first{border-top:0}
+.tn b{display:block;font-size:15px;color:var(--navy)}.tn small{color:var(--mut);font-size:11.5px}
+.bar{position:relative;height:17px;margin:2px 0;border-radius:5px;background:#f1f5f9}
+.bar i{position:absolute;left:0;top:0;bottom:0;border-radius:5px;min-width:3px}
+.bar span{position:absolute;left:8px;top:0;font-size:11.5px;line-height:17px;font-weight:700;color:#0f172a;
+text-shadow:0 0 3px #fff,0 0 3px #fff}
+.bar.neg span{color:#991b1b}
+table.gt{width:100%;border-collapse:collapse;font-size:13.5px}
+.gt th{white-space:nowrap;text-align:right;color:var(--mut);font-size:12px;font-weight:600;padding:6px 8px;border-bottom:2px solid var(--line)}
+.gt th:first-child,.gt td:first-child{text-align:left}
+.gt td{padding:8px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.gt td.gname b{color:var(--navy)}
+.badge{display:inline-block;margin-left:6px;font-size:10px;font-weight:700;padding:1px 7px;border-radius:999px;
+background:#e2e8f0;color:#475569;vertical-align:1px}
+.badge.dep{background:#dbeafe;color:#1d4ed8}
+.gt .sb{display:inline-block;width:46px;height:9px;background:#f1f5f9;border-radius:5px;margin-right:8px;
+vertical-align:middle;position:relative}
+.gt .sb i{position:absolute;left:0;top:0;bottom:0;border-radius:5px;background:#3b82f6}
+.gt td.dash{color:#cbd5e1}
+.gt tr.tot td{border-top:2px solid var(--navy);font-weight:800;color:var(--navy);border-bottom:0}
+"""
+
+_TYPE_DESC = {"22GP": "Dry 20'", "42GP": "Dry 40'", "45GP": "Dry 40' HC", "22RE": "Reefer 20'",
+              "45RE": "Reefer 40' HC", "22UT": "Open top 20'", "42UT": "Open top 40'",
+              "22PC": "Platform 20'", "42PC": "Platform 40'"}
+
+
+def _nav(active):
+    items = (("index", "index.html", "📋 ตารางรายงาน"), ("overview", "overview.html", "📊 ภาพรวม"))
+    links = []
+    for key, href, label in items:
+        on = " class='on'" if key == active else ""
+        links.append(f"<a href='{href}'{on}>{label}</a>")
+    return "<nav class='nav'>" + "".join(links) + "</nav>"
+
+
+def _ov_zone(zone, cs, fi, bk1, bk2, repo_side, bal_side, wk1_lbl, wk2_lbl):
+    cfg = XL_ZONES[zone]
+    groups, code = cfg["groups"], cfg["code"]
+    stock = {t: _xl_sum(cs, groups)[t] + int(repo_side[t]) for t in TEMPLATE_TYPES}
+    fin, b1, b2 = _xl_sum(fi, groups), _xl_sum(bk1, groups), _xl_sum(bk2, groups)
+    bal = {t: int(bal_side[t]) for t in TEMPLATE_TYPES}
+
+    def tot(d):
+        return sum(d.values())
+
+    bal_total = tot(bal)
+    kpis = (
+        f"<div class='kpi'><small>ตู้ว่างในสต็อกตอนนี้</small><b>{tot(stock):,}</b><em>ตู้ (รวม REPO E/P)</em></div>"
+        f"<div class='kpi'><small>ตู้ FULL ขาเข้า (รอคืนตู้ว่าง)</small><b>{tot(fin):,}</b><em>ตู้</em></div>"
+        f"<div class='kpi'><small>Booking {wk1_lbl}</small><b>{tot(b1):,}</b><em>สัปดาห์นี้</em></div>"
+        f"<div class='kpi'><small>Booking {wk2_lbl}</small><b>{tot(b2):,}</b><em>สัปดาห์หน้า</em></div>"
+        f"<div class='kpi {'good' if bal_total > 0 else 'bad'}'><small>คงเหลือหลังหัก booking</small>"
+        f"<b>{bal_total:,}</b><em>ตู้ (ผลรวมทุกชนิด)</em></div>")
+
+    active = [t for t in TEMPLATE_TYPES if any((stock[t], fin[t], b1[t], b2[t], bal[t]))]
+    scale = max([abs(v) for t in active for v in (stock[t], b1[t] + b2[t], bal[t])] + [1])
+
+    def bar(cls, val):
+        w = min(100, abs(val) / scale * 100) if val else 0
+        neg = " neg" if val < 0 else ""
+        return (f"<div class='bar{neg}'><i class='{cls}' style='width:{w:.1f}%'></i>"
+                f"<span>{val}</span></div>")
+
+    trows = ""
+    for n, t in enumerate(active):
+        first = " first" if n == 0 else ""
+        trows += (f"<div class='trow{first}'><div class='tn'><b>{t}</b><small>{_TYPE_DESC[t]}</small></div><div>"
+                  + bar("c-s", stock[t]) + bar("c-b", b1[t] + b2[t])
+                  + bar("c-n" if bal[t] < 0 else "c-p", bal[t]) + "</div></div>")
+
+    gmax = max([sum(int(cs[g][t]) for t in TEMPLATE_TYPES) for g in groups] + [1])
+    grows = ""
+    for g in groups:
+        st = sum(int(cs[g][t]) for t in TEMPLATE_TYPES)
+        if GROUP_TYPE[g] == "DEPOT":
+            badge = "<span class='badge dep'>DEPOT</span>"
+        else:
+            badge = f"<span class='badge'>{GROUP_TYPE[g]}</span>"
+        if g in cfg["no_book"]:
+            c1 = c2 = "<td class='dash'>–</td>"
+        else:
+            c1 = f"<td>{sum(int(bk1[g][t]) for t in TEMPLATE_TYPES):,}</td>"
+            c2 = f"<td>{sum(int(bk2[g][t]) for t in TEMPLATE_TYPES):,}</td>"
+        if GROUP_TYPE[g] == "DEPOT":
+            fcell = "<td class='dash'>–</td>"
+        else:
+            fcell = f"<td>{sum(int(fi[g][t]) for t in TEMPLATE_TYPES):,}</td>"
+        grows += (f"<tr><td class='gname'><b>{g}</b>{badge}</td>"
+                  f"<td><span class='sb'><i style='width:{st / gmax * 100:.0f}%'></i></span>{st:,}</td>"
+                  f"{fcell}{c1}{c2}</tr>")
+    grows += (f"<tr class='tot'><td>รวม {code}</td><td>{tot(stock):,}</td><td>{tot(fin):,}</td>"
+              f"<td>{tot(b1):,}</td><td>{tot(b2):,}</td></tr>")
+
+    return f"""<section class="ov-zone" data-zone="{zone}">
+<div class="ov-h"><h2>TH{code}</h2><span>ภาพรวมตู้ว่าง เทียบกับ booking</span></div>
+<div class="kpis">{kpis}</div>
+<div class="ov-cols">
+<div><h3>สต็อก vs Booking แยกตามชนิดตู้</h3>
+<p class="hint">ดูง่ายๆ: แท่งสีเขียวคือตู้ที่เหลือหลังหัก booking ถ้าเป็นสีแดงคือตู้ไม่พอ</p>
+<div class="legend"><span><i class="c-s"></i>ตู้ว่างในสต็อก</span>
+<span><i class="c-b"></i>Booking 2 สัปดาห์</span><span><i class="c-p"></i>คงเหลือ</span>
+<span><i class="c-n"></i>ขาด</span></div>{trows}</div>
+<div><h3>แยกตามสถานที่</h3>
+<p class="hint">จำนวนตู้รวมทุกชนิดต่อสถานที่ ( – = ไม่มีข้อมูลในส่วนนั้น)</p>
+<table class="gt"><thead><tr><th>สถานที่</th><th>ตู้ว่างในสต็อก</th><th>FULL ขาเข้า</th>
+<th title='{wk1_lbl}'>Booking WK1ST</th><th title='{wk2_lbl}'>Booking WK2ND</th></tr></thead><tbody>{grows}</tbody></table></div>
+</div></section>"""
+
+
+def write_overview(path, report_date, wk1_lbl, wk2_lbl, fi, cs, bk1, bk2, bal, repo):
+    weekday = TH_DAYS[report_date.weekday()]
+    zones = (_ov_zone("bkk", cs, fi, bk1, bk2, repo["BKK"], bal["BKK"], wk1_lbl, wk2_lbl)
+             + _ov_zone("lch", cs, fi, bk1, bk2, repo["LCH"], bal["LCH"], wk1_lbl, wk2_lbl))
+    html = f"""<!doctype html><html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Stock Report HQ &ndash; ภาพรวม {report_date:%Y-%m-%d}</title>
+<style>{DASH_CSS}{OV_CSS}</style></head><body>
+<div class="accent-bar"></div>
+<div class="wrap">
+<header class="topbar">
+<div><h1>Stock Report HQ</h1>
+<p class="sub">ภาพรวมประจำวันที่ {report_date:%d/%m/%Y} (วัน{weekday})</p></div>
+<img src="logo.png" alt="logo">
+</header>
+{_nav("overview")}
+<div class="toolbar">
+<button type="button" class="filter-btn active" data-filter="all">ALL</button>
+<button type="button" class="filter-btn" data-filter="bkk">THBKK</button>
+<button type="button" class="filter-btn" data-filter="lch">THLCH</button>
+</div>
+{zones}
+<footer>สร้างอัตโนมัติจาก build_stock_hq.py &middot; ตัวเลขเป็นยอดรวม (ไม่มีชื่อลูกค้า/เลขบุ๊คกิ้ง) &middot;
+คงเหลือ = ตู้ในสต็อก + FULL ขาเข้า &minus; Booking (ตามสูตรชีต NEW FORMAT)</footer>
+</div>
+<script>{DASH_JS}</script>
+</body></html>"""
+    with open(path, "w", encoding="utf-8") as fh:
+        fh.write(html)
+
+
 def write_dashboard(path, report_date, wk1_lbl, wk2_lbl,
                     fi, cs, bk1, bk2, sew1, sew2, bal, rf, repo, xlsx_name):
     date_txt = f"{report_date.day}/{report_date.month}/{report_date.year}"
@@ -874,6 +1045,7 @@ def write_dashboard(path, report_date, wk1_lbl, wk2_lbl,
 <p class="sub">รายงานประจำวันที่ {report_date:%d/%m/%Y} (วัน{weekday})</p></div>
 <img src="logo.png" alt="logo">
 </header>
+{_nav("index")}
 <div class="toolbar">
 <button type="button" class="filter-btn active" data-filter="all">ALL</button>
 <button type="button" class="filter-btn" data-filter="bkk">THBKK</button>
@@ -887,10 +1059,10 @@ def write_dashboard(path, report_date, wk1_lbl, wk2_lbl,
 {wk1}
 {wk2}
 </div></div>
-<div class="rf-title">NEW FORMAT</div>
-<div class="nf-wrap">{nf_html}</div>
 <div class="rf-title">RF SEASONAL</div>
 <div class="rf-wrap">{_xl_rf_zone("bkk", rf)}{_xl_rf_zone("lch", rf)}</div>
+<div class="rf-title">NEW FORMAT</div>
+<div class="nf-wrap">{nf_html}</div>
 <footer>สร้างอัตโนมัติจาก build_stock_hq.py &middot; ตัวเลขเป็นยอดรวมรายกลุ่มสถานที่ (ไม่มีชื่อลูกค้า/เลขบุ๊คกิ้ง)</footer>
 </div>
 <script>{DASH_JS}</script>
@@ -1052,13 +1224,18 @@ def main(argv=None):
 
 
 def publish_dashboard(src_html, dash_dir, report_date):
-    """Copy the freshly built index.html into the public dashboard repo and push."""
+    """Copy the freshly built index.html + overview.html into the public dashboard repo and push."""
     if not os.path.isdir(os.path.join(dash_dir, ".git")):
         print(f"  publish skipped: {dash_dir} is not a git repo "
               f"(clone https://github.com/sirichai1265/hal-stock-hq-dashboard there first)")
         return
-    shutil.copyfile(src_html, os.path.join(dash_dir, "index.html"))
-    subprocess.run(["git", "-C", dash_dir, "add", "index.html"], check=True)
+    pages = ["index.html"]
+    ov = os.path.join(os.path.dirname(src_html), "overview.html")
+    if os.path.exists(ov):
+        pages.append("overview.html")
+    for name in pages:
+        shutil.copyfile(src_html if name == "index.html" else ov, os.path.join(dash_dir, name))
+    subprocess.run(["git", "-C", dash_dir, "add"] + pages, check=True)
     r = subprocess.run(["git", "-C", dash_dir, "commit", "-m",
                         f"dashboard {report_date:%Y-%m-%d}"], capture_output=True, text=True)
     if r.returncode and "nothing to commit" in (r.stdout + r.stderr):

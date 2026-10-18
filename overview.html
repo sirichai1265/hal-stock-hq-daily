@@ -1,0 +1,216 @@
+<!doctype html><html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Stock Report HQ &ndash; ภาพรวม 2026-10-15</title>
+<style>
+:root{--navy:#0d2b46;--ink:#1b2735;--mut:#64748b;--line:#e2e8f0;--bkk:#1d6fe8;--lch:#d72638}
+*{box-sizing:border-box}
+body{margin:0;color:var(--ink);background:#e9eef5;font:14px/1.5 "Segoe UI","Leelawadee UI","Noto Sans Thai",Roboto,sans-serif}
+.accent-bar{height:5px;background:linear-gradient(90deg,var(--bkk),var(--lch))}
+.wrap{max-width:1800px;margin:0 auto;padding:18px 18px 48px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;
+background:linear-gradient(rgba(255,255,255,.88),rgba(255,255,255,.88)),url('header.jpg') center/cover;
+border:1px solid var(--line);border-radius:16px;padding:18px 26px;margin:0 0 12px;box-shadow:0 5px 16px rgba(15,35,60,.08)}
+.topbar img{height:46px;width:auto;object-fit:contain}
+h1{font-size:24px;margin:0 0 2px;color:var(--navy);font-weight:800}
+.sub{color:var(--mut);margin:0;font-size:14px}
+.toolbar{display:flex;gap:6px;margin:0 0 12px}
+.filter-btn{cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--mut);
+font-family:inherit;font-weight:700;font-size:12.5px;line-height:1;letter-spacing:.03em;
+padding:9px 18px;border-radius:999px;transition:all .15s}
+.filter-btn:hover{border-color:var(--bkk);color:var(--navy)}
+.filter-btn.active{color:#fff;border-color:transparent}
+.filter-btn[data-filter="all"].active{background:var(--navy)}
+.filter-btn[data-filter="bkk"].active{background:var(--bkk)}
+.filter-btn[data-filter="lch"].active{background:var(--lch)}
+.hide{display:none!important}
+.xl-wrap{overflow-x:auto;background:#fff;border:1px solid #cbd5e1;border-radius:10px;padding:10px}
+.xl{width:max-content;font-family:Arial,"Segoe UI","Noto Sans Thai",sans-serif;font-size:13px;color:#000}
+.xl-title{display:flex;align-items:stretch;border:2px solid #000;height:56px;margin:0 0 6px}
+.xl-title .t-name{display:flex;align-items:center;padding:0 14px;font-weight:700;font-size:20px;color:#1f4e79;
+min-width:250px;border-right:2px solid #000}
+.xl-title .t-logo{flex:1;display:flex;align-items:center;padding:0 10px}
+.xl-title .t-logo img{height:44px;width:auto}
+.xl-title .t-date{display:flex;align-items:center;gap:22px;padding:0 18px;border-left:2px solid #000;min-width:210px;font-weight:700}
+.band{display:flex;align-items:flex-start}
+.band + .band{margin-top:8px}
+.zone{flex:none;border:2px solid #000}
+.xl.stacked .band{flex-direction:column;gap:8px}
+.xl table{border-collapse:collapse;table-layout:fixed}
+.xl col.c-loc,.xl col.c-typ{width:84px}
+.xl col.c-n{width:37px}
+.xl td,.xl th{border:1px solid #bfbfbf;height:21px;padding:0 1px;text-align:center;font-weight:400;
+white-space:nowrap;overflow:hidden;background:#fff}
+.xl th.hd{background:#d9d9d9;font-weight:700}
+.xl th.hd2{background:#d9d9d9;font-size:12.5px}
+.xl th.dt{background:#fff;font-weight:700}
+.xl .blue{color:#0000ff}
+.xl .sepl{border-left:2px solid #000}
+.xl thead tr:last-child th{border-bottom:2px solid #000}
+.xl .dep{color:#0000ff}
+.xl .na{background:#d9d9d9}
+.xl .ylw{background:#ffff99}
+.xl .mute{background:#b0b0b0}
+.xl td.loc,.xl td.typ{text-align:center}
+.xl tr.tot td{border-top:2px solid #000}
+.xl td.totl{background:#d9d9d9;font-weight:700}
+.xl tr.tot td.blue{color:#0000ff}
+.xl td.neg{background:#ffc7ce!important;color:#9c0006!important;font-weight:700}
+.nf-wrap{display:flex;flex-wrap:wrap;gap:22px;overflow-x:auto}
+.nf{font-family:Calibri,"Segoe UI","Noto Sans Thai",Arial,sans-serif;font-size:14px;color:#000}
+.nf table{border-collapse:collapse}
+.nf td,.nf th{border:1.5px solid #808080;height:27px;min-width:56px;padding:0 6px;text-align:center;font-weight:400;background:#fff}
+.nf th{background:#9dc3e6;font-weight:400}
+.nf thead tr:first-child th{font-weight:700;font-size:15px}
+.nf td.it{min-width:150px;text-align:center}
+.nf tr.gry td{background:#bfbfbf}
+.nf tr.org td{background:#fff2cc}
+.nf tr.bal td{font-weight:700}
+.nf tr.bal td.it{color:#000}
+.nf td.bl{color:#0000ff}
+.nf td.rd{color:#ff0000}
+.nf td.rng{border:none;background:none;text-align:left;padding-left:12px;white-space:nowrap;font-weight:400}
+.rf-wrap{display:flex;flex-wrap:wrap;gap:14px;margin-top:16px}
+.rf{border:2px solid #000;font-family:Arial,"Segoe UI",sans-serif;font-size:13px}
+.rf table{border-collapse:collapse}
+.rf td,.rf th{border:1px solid #bfbfbf;height:21px;min-width:78px;padding:0 6px;text-align:center;font-weight:400;background:#fff}
+.rf th{background:#d9d9d9;font-weight:700}
+.rf tr.tot td{border-top:3px double #000;font-weight:700;background:#d9d9d9}
+.rf-title{font-weight:700;color:#1f4e79;margin:16px 0 0;font-size:15px}
+footer{margin-top:26px;color:var(--mut);font-size:12px;text-align:center}
+@media(max-width:600px){.topbar{flex-direction:column;align-items:flex-start;padding:14px 16px}
+.topbar img{height:34px}h1{font-size:20px}.wrap{padding:12px 10px 36px}}
+
+.nav{display:flex;gap:8px;margin:0 0 12px}
+.nav a{text-decoration:none;font-weight:700;font-size:13px;padding:9px 18px;border-radius:999px;
+border:1px solid var(--line);background:#fff;color:var(--mut)}
+.nav a:hover{border-color:var(--bkk);color:var(--navy)}
+.nav a.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.ov-zone{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px 22px;margin:0 0 16px;
+box-shadow:0 5px 16px rgba(15,35,60,.06);border-top:5px solid var(--zc)}
+.ov-zone[data-zone=bkk]{--zc:var(--bkk)}.ov-zone[data-zone=lch]{--zc:var(--lch)}
+.ov-h{display:flex;align-items:baseline;gap:12px;margin:0 0 14px}
+.ov-h h2{margin:0;font-size:22px;color:var(--zc);font-weight:800}
+.ov-h span{color:var(--mut);font-size:13px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:0 0 20px}
+.kpi{border:1px solid var(--line);border-radius:12px;padding:12px 16px;background:#f8fafc}
+.kpi small{display:block;color:var(--mut);font-size:12px;font-weight:600}
+.kpi b{display:block;font-size:30px;line-height:1.15;color:var(--navy);font-weight:800;margin-top:2px}
+.kpi em{font-style:normal;color:var(--mut);font-size:11.5px}
+.kpi.good b{color:#15803d}.kpi.bad b{color:#c81e1e}
+.ov-cols{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:22px}
+@media(max-width:1250px){.ov-cols{grid-template-columns:1fr}}
+.ov-cols>div{min-width:0;overflow-x:auto}
+.gt th,.gt td{padding-left:6px;padding-right:6px}
+.ov-cols h3{margin:0 0 4px;font-size:15px;color:var(--navy)}
+.ov-cols p.hint{margin:0 0 12px;color:var(--mut);font-size:12.5px}
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin:0 0 12px;font-size:12.5px;color:var(--mut)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.c-s{background:#3b82f6}.c-b{background:#f59e0b}.c-p{background:#16a34a}.c-n{background:#dc2626}
+.trow{display:grid;grid-template-columns:92px 1fr;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}
+.trow.first{border-top:0}
+.tn b{display:block;font-size:15px;color:var(--navy)}.tn small{color:var(--mut);font-size:11.5px}
+.bar{position:relative;height:17px;margin:2px 0;border-radius:5px;background:#f1f5f9}
+.bar i{position:absolute;left:0;top:0;bottom:0;border-radius:5px;min-width:3px}
+.bar span{position:absolute;left:8px;top:0;font-size:11.5px;line-height:17px;font-weight:700;color:#0f172a;
+text-shadow:0 0 3px #fff,0 0 3px #fff}
+.bar.neg span{color:#991b1b}
+table.gt{width:100%;border-collapse:collapse;font-size:13.5px}
+.gt th{white-space:nowrap;text-align:right;color:var(--mut);font-size:12px;font-weight:600;padding:6px 8px;border-bottom:2px solid var(--line)}
+.gt th:first-child,.gt td:first-child{text-align:left}
+.gt td{padding:8px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.gt td.gname b{color:var(--navy)}
+.badge{display:inline-block;margin-left:6px;font-size:10px;font-weight:700;padding:1px 7px;border-radius:999px;
+background:#e2e8f0;color:#475569;vertical-align:1px}
+.badge.dep{background:#dbeafe;color:#1d4ed8}
+.gt .sb{display:inline-block;width:46px;height:9px;background:#f1f5f9;border-radius:5px;margin-right:8px;
+vertical-align:middle;position:relative}
+.gt .sb i{position:absolute;left:0;top:0;bottom:0;border-radius:5px;background:#3b82f6}
+.gt td.dash{color:#cbd5e1}
+.gt tr.tot td{border-top:2px solid var(--navy);font-weight:800;color:var(--navy);border-bottom:0}
+</style></head><body>
+<div class="accent-bar"></div>
+<div class="wrap">
+<header class="topbar">
+<div><h1>Stock Report HQ</h1>
+<p class="sub">ภาพรวมประจำวันที่ 15/10/2026 (วันพฤหัสบดี)</p></div>
+<img src="logo.png" alt="logo">
+</header>
+<nav class='nav'><a href='index.html'>📋 ตารางรายงาน</a><a href='overview.html' class='on'>📊 ภาพรวม</a></nav>
+<div class="toolbar">
+<button type="button" class="filter-btn active" data-filter="all">ALL</button>
+<button type="button" class="filter-btn" data-filter="bkk">THBKK</button>
+<button type="button" class="filter-btn" data-filter="lch">THLCH</button>
+</div>
+<section class="ov-zone" data-zone="bkk">
+<div class="ov-h"><h2>THBKK</h2><span>ภาพรวมตู้ว่าง เทียบกับ booking</span></div>
+<div class="kpis"><div class='kpi'><small>ตู้ว่างในสต็อกตอนนี้</small><b>3,168</b><em>ตู้ (รวม REPO E/P)</em></div><div class='kpi'><small>ตู้ FULL ขาเข้า (รอคืนตู้ว่าง)</small><b>485</b><em>ตู้</em></div><div class='kpi'><small>Booking 15-18/10/2026</small><b>394</b><em>สัปดาห์นี้</em></div><div class='kpi'><small>Booking 19-25/10/2026</small><b>608</b><em>สัปดาห์หน้า</em></div><div class='kpi good'><small>คงเหลือหลังหัก booking</small><b>2,651</b><em>ตู้ (ผลรวมทุกชนิด)</em></div></div>
+<div class="ov-cols">
+<div><h3>สต็อก vs Booking แยกตามชนิดตู้</h3>
+<p class="hint">ดูง่ายๆ: แท่งสีเขียวคือตู้ที่เหลือหลังหัก booking ถ้าเป็นสีแดงคือตู้ไม่พอ</p>
+<div class="legend"><span><i class="c-s"></i>ตู้ว่างในสต็อก</span>
+<span><i class="c-b"></i>Booking 2 สัปดาห์</span><span><i class="c-p"></i>คงเหลือ</span>
+<span><i class="c-n"></i>ขาด</span></div><div class='trow first'><div class='tn'><b>22GP</b><small>Dry 20'</small></div><div><div class='bar'><i class='c-s' style='width:100.0%'></i><span>1739</span></div><div class='bar'><i class='c-b' style='width:31.5%'></i><span>548</span></div><div class='bar'><i class='c-p' style='width:80.6%'></i><span>1401</span></div></div></div><div class='trow'><div class='tn'><b>42GP</b><small>Dry 40'</small></div><div><div class='bar'><i class='c-s' style='width:0.3%'></i><span>5</span></div><div class='bar'><i class='c-b' style='width:0.1%'></i><span>1</span></div><div class='bar'><i class='c-p' style='width:0.2%'></i><span>4</span></div></div></div><div class='trow'><div class='tn'><b>45GP</b><small>Dry 40' HC</small></div><div><div class='bar'><i class='c-s' style='width:78.3%'></i><span>1361</span></div><div class='bar'><i class='c-b' style='width:22.6%'></i><span>393</span></div><div class='bar'><i class='c-p' style='width:69.9%'></i><span>1216</span></div></div></div><div class='trow'><div class='tn'><b>22RE</b><small>Reefer 20'</small></div><div><div class='bar'><i class='c-s' style='width:2.2%'></i><span>38</span></div><div class='bar'><i class='c-b' style='width:0.5%'></i><span>9</span></div><div class='bar'><i class='c-p' style='width:2.1%'></i><span>36</span></div></div></div><div class='trow'><div class='tn'><b>45RE</b><small>Reefer 40' HC</small></div><div><div class='bar'><i class='c-s' style='width:1.4%'></i><span>25</span></div><div class='bar'><i class='c-b' style='width:2.9%'></i><span>51</span></div><div class='bar neg'><i class='c-n' style='width:0.3%'></i><span>-6</span></div></div></div></div>
+<div><h3>แยกตามสถานที่</h3>
+<p class="hint">จำนวนตู้รวมทุกชนิดต่อสถานที่ ( – = ไม่มีข้อมูลในส่วนนั้น)</p>
+<table class="gt"><thead><tr><th>สถานที่</th><th>ตู้ว่างในสต็อก</th><th>FULL ขาเข้า</th>
+<th title='15-18/10/2026'>Booking WK1ST</th><th title='19-25/10/2026'>Booking WK2ND</th></tr></thead><tbody><tr><td class='gname'><b>PAT</b><span class='badge'>TERMINAL</span></td><td><span class='sb'><i style='width:7%'></i></span>102</td><td>301</td><td>31</td><td>83</td></tr><tr><td class='gname'><b>UNITHAI</b><span class='badge'>TERMINAL</span></td><td><span class='sb'><i style='width:12%'></i></span>184</td><td>116</td><td>6</td><td>0</td></tr><tr><td class='gname'><b>ESCO #2</b><span class='badge'>ICD</span></td><td><span class='sb'><i style='width:0%'></i></span>5</td><td>36</td><td>0</td><td>0</td></tr><tr><td class='gname'><b>TIFFA</b><span class='badge'>ICD</span></td><td><span class='sb'><i style='width:0%'></i></span>3</td><td>30</td><td>20</td><td>20</td></tr><tr><td class='gname'><b>SMART</b><span class='badge dep'>DEPOT</span></td><td><span class='sb'><i style='width:100%'></i></span>1,503</td><td class='dash'>–</td><td>39</td><td>35</td></tr><tr><td class='gname'><b>BC2</b><span class='badge dep'>DEPOT</span></td><td><span class='sb'><i style='width:91%'></i></span>1,371</td><td class='dash'>–</td><td>298</td><td>470</td></tr><tr><td class='gname'><b>BMTP</b><span class='badge'>ICD</span></td><td><span class='sb'><i style='width:0%'></i></span>0</td><td>2</td><td class='dash'>–</td><td class='dash'>–</td></tr><tr><td class='gname'><b>SCT</b><span class='badge'>ICD</span></td><td><span class='sb'><i style='width:0%'></i></span>0</td><td>0</td><td class='dash'>–</td><td class='dash'>–</td></tr><tr class='tot'><td>รวม BKK</td><td>3,168</td><td>485</td><td>394</td><td>608</td></tr></tbody></table></div>
+</div></section><section class="ov-zone" data-zone="lch">
+<div class="ov-h"><h2>THLCH</h2><span>ภาพรวมตู้ว่าง เทียบกับ booking</span></div>
+<div class="kpis"><div class='kpi'><small>ตู้ว่างในสต็อกตอนนี้</small><b>3,423</b><em>ตู้ (รวม REPO E/P)</em></div><div class='kpi'><small>ตู้ FULL ขาเข้า (รอคืนตู้ว่าง)</small><b>426</b><em>ตู้</em></div><div class='kpi'><small>Booking 15-18/10/2026</small><b>605</b><em>สัปดาห์นี้</em></div><div class='kpi'><small>Booking 19-25/10/2026</small><b>506</b><em>สัปดาห์หน้า</em></div><div class='kpi good'><small>คงเหลือหลังหัก booking</small><b>2,738</b><em>ตู้ (ผลรวมทุกชนิด)</em></div></div>
+<div class="ov-cols">
+<div><h3>สต็อก vs Booking แยกตามชนิดตู้</h3>
+<p class="hint">ดูง่ายๆ: แท่งสีเขียวคือตู้ที่เหลือหลังหัก booking ถ้าเป็นสีแดงคือตู้ไม่พอ</p>
+<div class="legend"><span><i class="c-s"></i>ตู้ว่างในสต็อก</span>
+<span><i class="c-b"></i>Booking 2 สัปดาห์</span><span><i class="c-p"></i>คงเหลือ</span>
+<span><i class="c-n"></i>ขาด</span></div><div class='trow first'><div class='tn'><b>22GP</b><small>Dry 20'</small></div><div><div class='bar'><i class='c-s' style='width:100.0%'></i><span>2084</span></div><div class='bar'><i class='c-b' style='width:32.1%'></i><span>668</span></div><div class='bar'><i class='c-p' style='width:77.2%'></i><span>1609</span></div></div></div><div class='trow'><div class='tn'><b>42GP</b><small>Dry 40'</small></div><div><div class='bar'><i class='c-s' style='width:0.0%'></i><span>1</span></div><div class='bar'><i class='c-b' style='width:0.1%'></i><span>2</span></div><div class='bar neg'><i class='c-n' style='width:0.0%'></i><span>-1</span></div></div></div><div class='trow'><div class='tn'><b>45GP</b><small>Dry 40' HC</small></div><div><div class='bar'><i class='c-s' style='width:60.4%'></i><span>1258</span></div><div class='bar'><i class='c-b' style='width:18.4%'></i><span>383</span></div><div class='bar'><i class='c-p' style='width:52.6%'></i><span>1097</span></div></div></div><div class='trow'><div class='tn'><b>22RE</b><small>Reefer 20'</small></div><div><div class='bar'><i class='c-s' style='width:0.6%'></i><span>12</span></div><div class='bar'><i class='c-b' style='width:0.1%'></i><span>2</span></div><div class='bar'><i class='c-p' style='width:0.5%'></i><span>10</span></div></div></div><div class='trow'><div class='tn'><b>45RE</b><small>Reefer 40' HC</small></div><div><div class='bar'><i class='c-s' style='width:3.0%'></i><span>62</span></div><div class='bar'><i class='c-b' style='width:2.6%'></i><span>55</span></div><div class='bar'><i class='c-p' style='width:0.9%'></i><span>18</span></div></div></div><div class='trow'><div class='tn'><b>22UT</b><small>Open top 20'</small></div><div><div class='bar'><i class='c-s' style='width:0.0%'></i><span>1</span></div><div class='bar'><i class='c-b' style='width:0.0%'></i><span>1</span></div><div class='bar'><i class='c-p' style='width:0.0%'></i><span>0</span></div></div></div><div class='trow'><div class='tn'><b>42UT</b><small>Open top 40'</small></div><div><div class='bar'><i class='c-s' style='width:0.1%'></i><span>2</span></div><div class='bar'><i class='c-b' style='width:0.0%'></i><span>0</span></div><div class='bar'><i class='c-p' style='width:0.1%'></i><span>2</span></div></div></div><div class='trow'><div class='tn'><b>22PC</b><small>Platform 20'</small></div><div><div class='bar'><i class='c-s' style='width:0.1%'></i><span>2</span></div><div class='bar'><i class='c-b' style='width:0.0%'></i><span>0</span></div><div class='bar'><i class='c-p' style='width:0.1%'></i><span>2</span></div></div></div><div class='trow'><div class='tn'><b>42PC</b><small>Platform 40'</small></div><div><div class='bar'><i class='c-s' style='width:0.0%'></i><span>1</span></div><div class='bar'><i class='c-b' style='width:0.0%'></i><span>0</span></div><div class='bar'><i class='c-p' style='width:0.0%'></i><span>1</span></div></div></div></div>
+<div><h3>แยกตามสถานที่</h3>
+<p class="hint">จำนวนตู้รวมทุกชนิดต่อสถานที่ ( – = ไม่มีข้อมูลในส่วนนั้น)</p>
+<table class="gt"><thead><tr><th>สถานที่</th><th>ตู้ว่างในสต็อก</th><th>FULL ขาเข้า</th>
+<th title='15-18/10/2026'>Booking WK1ST</th><th title='19-25/10/2026'>Booking WK2ND</th></tr></thead><tbody><tr><td class='gname'><b>LCMT</b><span class='badge'>TERMINAL</span></td><td><span class='sb'><i style='width:1%'></i></span>12</td><td>264</td><td class='dash'>–</td><td class='dash'>–</td></tr><tr><td class='gname'><b>ESCO</b><span class='badge'>TERMINAL</span></td><td><span class='sb'><i style='width:0%'></i></span>8</td><td>12</td><td class='dash'>–</td><td class='dash'>–</td></tr><tr><td class='gname'><b>LCIT</b><span class='badge'>TERMINAL</span></td><td><span class='sb'><i style='width:0%'></i></span>0</td><td>33</td><td class='dash'>–</td><td class='dash'>–</td></tr><tr><td class='gname'><b>HPT</b><span class='badge'>TERMINAL</span></td><td><span class='sb'><i style='width:7%'></i></span>134</td><td>117</td><td class='dash'>–</td><td class='dash'>–</td></tr><tr><td class='gname'><b>HAST</b><span class='badge dep'>DEPOT</span></td><td><span class='sb'><i style='width:68%'></i></span>1,308</td><td class='dash'>–</td><td>121</td><td>166</td></tr><tr><td class='gname'><b>CELLO</b><span class='badge dep'>DEPOT</span></td><td><span class='sb'><i style='width:2%'></i></span>44</td><td class='dash'>–</td><td>4</td><td>1</td></tr><tr><td class='gname'><b>PW</b><span class='badge dep'>DEPOT</span></td><td><span class='sb'><i style='width:100%'></i></span>1,917</td><td class='dash'>–</td><td>480</td><td>339</td></tr><tr class='tot'><td>รวม LCH</td><td>3,423</td><td>426</td><td>605</td><td>506</td></tr></tbody></table></div>
+</div></section>
+<footer>สร้างอัตโนมัติจาก build_stock_hq.py &middot; ตัวเลขเป็นยอดรวม (ไม่มีชื่อลูกค้า/เลขบุ๊คกิ้ง) &middot;
+คงเหลือ = ตู้ในสต็อก + FULL ขาเข้า &minus; Booking (ตามสูตรชีต NEW FORMAT)</footer>
+</div>
+<script>
+(function(){
+  var buttons = Array.prototype.slice.call(document.querySelectorAll('.filter-btn'));
+  var zoned = document.querySelectorAll('[data-zone]');
+  var wrap = document.getElementById('xlWrap');
+  var xl = document.getElementById('xl');
+  function fit(){
+    if (!wrap || !xl) return;
+    xl.style.zoom = 1;
+    xl.classList.remove('stacked');
+    var avail = wrap.clientWidth - 22;
+    var natural = xl.getBoundingClientRect().width;
+    var zonesShown = xl.querySelectorAll('.band')[0].querySelectorAll('.zone:not(.hide)').length;
+    var s = Math.min(1, avail / natural);
+    if (zonesShown > 1 && s < 0.72) {
+      xl.classList.add('stacked');
+      natural = xl.getBoundingClientRect().width;
+      s = Math.max(0.7, Math.min(1, avail / natural));
+    } else {
+      s = Math.max(0.5, s);
+    }
+    xl.style.zoom = s;
+  }
+  function apply(filter){
+    for (var i = 0; i < zoned.length; i++) {
+      var z = zoned[i].getAttribute('data-zone');
+      zoned[i].classList.toggle('hide', filter !== 'all' && z !== filter);
+    }
+    buttons.forEach(function(b){ b.classList.toggle('active', b.dataset.filter === filter); });
+    try { localStorage.setItem('halStockFilter', filter); } catch (e) {}
+    fit();
+  }
+  buttons.forEach(function(b){
+    b.addEventListener('click', function(){ apply(b.dataset.filter); });
+  });
+  var saved = 'all';
+  try { saved = localStorage.getItem('halStockFilter') || 'all'; } catch (e) {}
+  apply(saved);
+  window.addEventListener('resize', fit);
+  window.addEventListener('load', fit);
+})();
+</script>
+</body></html>
