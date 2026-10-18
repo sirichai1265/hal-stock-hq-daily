@@ -460,13 +460,16 @@ def build(actual_path, bkg_paths, staying_path, report_date, out_path, ep2_path=
             nf[f"{col}{row}"].number_format = ZERO_HIDE_FORMAT
 
     # NEW FORMAT Balance colour: red when zero or negative (<= 0, per sirichai 2026-10-06), else blue.
-    # Balance = CURRENT STOCK total (incl. REPO E/P row 14, like Daily!L15/AG15) +
-    #           FULL INBOUND total - BOOKING wk1 total - BOOKING wk2 total
+    # Balance mirrors the template formula exactly (so colours and the dashboard show
+    # what Excel shows): NEW FORMAT 'Current Stock' = Daily!L15/AG15, which already
+    # includes REPO (E/P) row 14, and the 'E/P In' row adds Daily!L14/AG14 again - so
+    # REPO is counted twice in the template's Balance (hence 2 * repo below).
+    #   Balance = CURRENT STOCK total + E/P In + FULL INBOUND - BOOKING wk1 - BOOKING wk2
     bal = {
-        "BKK": {t: sum(cs[g][t] for g in BKK_GROUPS) + repo["BKK"][t] + sum(fi[g][t] for g in BKK_GROUPS)
+        "BKK": {t: sum(cs[g][t] for g in BKK_GROUPS) + 2 * repo["BKK"][t] + sum(fi[g][t] for g in BKK_GROUPS)
                 - sum(bk1[g][t] for g in BKK_GROUPS) - sum(bk2[g][t] for g in BKK_GROUPS)
                 for t in TEMPLATE_TYPES},
-        "LCH": {t: sum(cs[g][t] for g in LCH_GROUPS) + repo["LCH"][t] + sum(fi[g][t] for g in LCH_GROUPS)
+        "LCH": {t: sum(cs[g][t] for g in LCH_GROUPS) + 2 * repo["LCH"][t] + sum(fi[g][t] for g in LCH_GROUPS)
                 - sum(bk1[g][t] for g in LCH_GROUPS) - sum(bk2[g][t] for g in LCH_GROUPS)
                 for t in TEMPLATE_TYPES},
     }
@@ -601,6 +604,20 @@ white-space:nowrap;overflow:hidden;background:#fff}
 .xl td.totl{background:#d9d9d9;font-weight:700}
 .xl tr.tot td.blue{color:#0000ff}
 .xl td.neg{background:#ffc7ce!important;color:#9c0006!important;font-weight:700}
+.nf-wrap{display:flex;flex-wrap:wrap;gap:22px;overflow-x:auto}
+.nf{font-family:Calibri,"Segoe UI","Noto Sans Thai",Arial,sans-serif;font-size:14px;color:#000}
+.nf table{border-collapse:collapse}
+.nf td,.nf th{border:1.5px solid #808080;height:27px;min-width:56px;padding:0 6px;text-align:center;font-weight:400;background:#fff}
+.nf th{background:#9dc3e6;font-weight:400}
+.nf thead tr:first-child th{font-weight:700;font-size:15px}
+.nf td.it{min-width:150px;text-align:center}
+.nf tr.gry td{background:#bfbfbf}
+.nf tr.org td{background:#fff2cc}
+.nf tr.bal td{font-weight:700}
+.nf tr.bal td.it{color:#000}
+.nf td.bl{color:#0000ff}
+.nf td.rd{color:#ff0000}
+.nf td.rng{border:none;background:none;text-align:left;padding-left:12px;white-space:nowrap;font-weight:400}
 .rf-wrap{display:flex;flex-wrap:wrap;gap:14px;margin-top:16px}
 .rf{border:2px solid #000;font-family:Arial,"Segoe UI",sans-serif;font-size:13px}
 .rf table{border-collapse:collapse}
@@ -790,6 +807,45 @@ def _xl_rf_zone(zone, rf):
             f"<tbody>{''.join(body)}</tbody></table></div>")
 
 
+def _nf_zone(zone, cs, fi, bk1, bk2, repo_side, bal_side, wk1_lbl, wk2_lbl):
+    """The NEW FORMAT sheet's table for one zone (same rows/labels/colours as Excel).
+    Current Stock = Daily total incl. REPO; Balance comes from build()'s `bal` (the
+    template formula). Single 0s are blank except Current Stock and Balance."""
+    cfg = XL_ZONES[zone]
+    groups, code = cfg["groups"], cfg["code"]
+    cs_tot = {t: _xl_sum(cs, groups)[t] + int(repo_side[t]) for t in TEMPLATE_TYPES}
+    fi_tot = _xl_sum(fi, groups)
+    b1_tot = _xl_sum(bk1, groups)
+    b2_tot = _xl_sum(bk2, groups)
+
+    def cells(vals, zero_blank=True, cls_fn=None):
+        out = []
+        for t in TEMPLATE_TYPES:
+            v = int(vals[t])
+            c = cls_fn(v) if cls_fn else ""
+            out.append(f"<td class='{c}'>{'' if (zero_blank and v == 0) else v}</td>")
+        return "".join(out)
+
+    def row(label, vals, tr_cls="", zero_blank=True, rng="", cls_fn=None):
+        rng_td = f"<td class='rng'>{rng}</td>" if rng else ""
+        return (f"<tr class='{tr_cls}'><td class='it'>{label}</td>"
+                f"{cells(vals, zero_blank, cls_fn)}{rng_td}</tr>")
+
+    empty = {t: 0 for t in TEMPLATE_TYPES}
+    types = "".join(f"<th>{t}</th>" for t in TEMPLATE_TYPES)
+    body = (row("Current Stock", cs_tot, zero_blank=False)
+            + row("E/P In (this week)", repo_side)
+            + row("", empty, "gry") + row("", empty, "gry")
+            + row("INBOUND MT RETURN", fi_tot, "org")
+            + row("Booking(This week)", b1_tot, rng=wk1_lbl)
+            + row("Booking(Next week)", b2_tot, rng=wk2_lbl)
+            + row("Balance", bal_side, "bal", zero_blank=False,
+                  cls_fn=lambda v: "rd" if v <= 0 else "bl"))
+    return (f"<div class='nf' data-zone='{zone}'><table><thead>"
+            f"<tr><th colspan='10'>HAL (TH{code})</th></tr>"
+            f"<tr><th>Item</th>{types}</tr></thead><tbody>{body}</tbody></table></div>")
+
+
 def write_dashboard(path, report_date, wk1_lbl, wk2_lbl,
                     fi, cs, bk1, bk2, sew1, sew2, bal, rf, repo, xlsx_name):
     date_txt = f"{report_date.day}/{report_date.month}/{report_date.year}"
@@ -802,6 +858,8 @@ def write_dashboard(path, report_date, wk1_lbl, wk2_lbl,
     wk2 = ("<div class='band'>"
            + _xl_book_zone("bkk", bk2, sew2, "WK2ND", wk2_lbl)
            + _xl_book_zone("lch", bk2, sew2, "WK2ND", wk2_lbl) + "</div>")
+    nf_html = (_nf_zone("bkk", cs, fi, bk1, bk2, repo["BKK"], bal["BKK"], wk1_lbl, wk2_lbl)
+               + _nf_zone("lch", cs, fi, bk1, bk2, repo["LCH"], bal["LCH"], wk1_lbl, wk2_lbl))
     logo = _sheet_logo_uri()
     logo_html = f"<img src='{logo}' alt='Heung A Line'>" if logo else ""
     weekday = TH_DAYS[report_date.weekday()]
@@ -829,6 +887,8 @@ def write_dashboard(path, report_date, wk1_lbl, wk2_lbl,
 {wk1}
 {wk2}
 </div></div>
+<div class="rf-title">NEW FORMAT</div>
+<div class="nf-wrap">{nf_html}</div>
 <div class="rf-title">RF SEASONAL</div>
 <div class="rf-wrap">{_xl_rf_zone("bkk", rf)}{_xl_rf_zone("lch", rf)}</div>
 <footer>สร้างอัตโนมัติจาก build_stock_hq.py &middot; ตัวเลขเป็นยอดรวมรายกลุ่มสถานที่ (ไม่มีชื่อลูกค้า/เลขบุ๊คกิ้ง)</footer>
