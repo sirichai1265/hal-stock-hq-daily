@@ -538,69 +538,160 @@ def neg_note(g, t, v, fi):
 # --------------------------------------------------------------------------- #
 #  HTML dashboard                                                              #
 # --------------------------------------------------------------------------- #
-# NOTE: this must stay byte-for-byte in sync with what's live on the public
-# dashboard repo (hal-stock-hq-dashboard) - this is Numtarn's merged-table /
-# filter-buttons / live-clock redesign (commits 9f9d7c8..a074448, 2026-09-14),
-# reused verbatim (CSS + JS) with our own data plugged in. If it gets
-# redesigned again, re-sync from the live site rather than silently reverting.
+# Redesigned 2026-10-18 ("ทำให้สวยงาม เข้าใจง่ายกว่าเดิม"): KPI summary per zone,
+# colour-coded blocks (FULL INBOUND green / CURRENT STOCK blue / BOOKING amber /
+# STOCK BALANCE END navy), Thai one-line explanations, sticky toolbar with section
+# links, sticky location column. Kept from Numtarn's version: logo + header photo,
+# ALL/THBKK/THLCH filter, merged BKK/LCH tables with a Type column, REPO (E/P) row,
+# RF SEASONAL table, title "Stock Report HQ". Still removed on purpose (earlier
+# requests): live clock, 'created at' chip, WK1ST/WK2ND/Excel meta chips and the
+# negative-alert box - negatives are shown in red inside the tables.
 DASH_CSS = """
-:root{--bg-a:#eaf1fb;--bg-b:#f8f5f2;--card:#fff;--ink:#1c2530;--mut:#66738a;--line:#e3e8f0;
---depot:#1a56db;--neg:#c0192b;--negbg:#fff1f0;--head:#0d2b46;--accent:#0f6fff;--accent2:#d0202f;--chip:#eaf2ff;
---grid:#c7ccd6;--headbg:#eef0f4}
-*{box-sizing:border-box}body{margin:0;color:var(--ink);
-background:linear-gradient(160deg,var(--bg-a) 0%,#f7f9fc 40%,var(--bg-b) 100%) fixed;
-font:14px/1.5 -apple-system,Segoe UI,Roboto,"Noto Sans Thai",sans-serif}
-.accent-bar{height:5px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
-.wrap{max-width:1180px;margin:0 auto;padding:24px 20px 60px}
+:root{--navy:#0d2b46;--ink:#1b2735;--mut:#64748b;--line:#e2e8f0;--grid:#e3e9f2;--card:#fff;--bg:#eef3f9;
+--bkk:#1d6fe8;--bkk-soft:#e7f0ff;--lch:#d72638;--lch-soft:#fdeaec;
+--in:#0f8a5f;--in-soft:#e1f5ec;--in-soft2:#f1faf6;
+--stock:#1d5fd1;--stock-soft:#e4edff;--stock-soft2:#f1f5ff;
+--bkg:#b25e00;--bkg-soft:#fff1d6;--bkg-soft2:#fff9ec;
+--bal:#0d2b46;--bal-soft:#e6ebf3;--bal-soft2:#f3f6fa;
+--neg:#c0192b;--negbg:#ffe1e5;--depot:#1a56db;--zero:#c1cad8;--divider:#b9c5d6}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;color:var(--ink);
+background:radial-gradient(1100px 480px at 8% -8%,#dbe8fb 0,rgba(219,232,251,0) 62%),var(--bg);
+font:14px/1.55 "Segoe UI","Leelawadee UI","Noto Sans Thai",Roboto,sans-serif}
+.accent-bar{height:5px;background:linear-gradient(90deg,var(--bkk),var(--lch))}
+.wrap{max-width:1240px;margin:0 auto;padding:22px 20px 56px}
 .topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;
 background:linear-gradient(rgba(255,255,255,.88),rgba(255,255,255,.88)),url('header.jpg') center/cover;
-border:1px solid var(--line);border-radius:14px;
-padding:18px 24px;margin:0 0 18px;box-shadow:0 3px 10px rgba(16,24,40,.06)}
-.topbar-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
-.topbar img{height:46px;width:auto;object-fit:contain}
-h1{font-size:21px;margin:0 0 2px;color:var(--head)}.sub{color:var(--mut);margin:0}
-.filter-bar{display:flex;gap:8px;margin:0 0 20px}
-.filter-btn{cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--mut);
-font-size:12.5px;font-weight:700;letter-spacing:.03em;padding:7px 18px;border-radius:999px;transition:all .15s}
-.filter-btn:hover{border-color:var(--accent);color:var(--head)}
+border:1px solid var(--line);border-radius:18px;padding:22px 28px;margin:0 0 14px;
+box-shadow:0 6px 20px rgba(15,35,60,.08)}
+.topbar img{height:50px;width:auto;object-fit:contain}
+h1{font-size:26px;margin:0 0 2px;color:var(--navy);font-weight:800;letter-spacing:-.01em}
+.sub{color:var(--mut);margin:0;font-size:14px}
+.toolbar{position:sticky;top:0;z-index:30;display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;
+justify-content:space-between;margin:0 -10px 6px;padding:10px 10px;
+background:rgba(238,243,249,.88);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+border-bottom:1px solid var(--line)}
+.filter-bar{display:flex;gap:6px}
+.filter-btn{cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--mut);
+font-family:inherit;font-weight:700;font-size:12.5px;line-height:1;letter-spacing:.03em;
+padding:9px 18px;border-radius:999px;transition:all .15s}
+.filter-btn:hover{border-color:var(--bkk);color:var(--navy)}
 .filter-btn.active{color:#fff;border-color:transparent}
-.filter-btn[data-filter="all"].active{background:var(--head)}
-.filter-btn[data-filter="bkk"].active{background:var(--accent)}
-.filter-btn[data-filter="lch"].active{background:var(--accent2)}
+.filter-btn[data-filter="all"].active{background:var(--navy)}
+.filter-btn[data-filter="bkk"].active{background:var(--bkk)}
+.filter-btn[data-filter="lch"].active{background:var(--lch)}
+.nav{display:flex;flex-wrap:wrap;gap:4px}
+.nav a{font-size:12.5px;font-weight:600;color:var(--mut);text-decoration:none;padding:7px 12px;border-radius:8px}
+.nav a:hover{background:#fff;color:var(--navy)}
+.nav a.on{background:var(--navy);color:#fff}
 .hide{display:none!important}
-.alert{background:linear-gradient(180deg,#fff6f5,#fff);border:1px solid var(--line);border-left:4px solid var(--neg);
-border-radius:12px;padding:14px 16px;margin:30px 0 0;box-shadow:0 2px 8px rgba(16,24,40,.05)}
-.alert h2{font-size:14px;margin:0 0 8px;color:var(--neg)}
-.alert ul{margin:0;padding-left:18px}.alert li{margin:3px 0}
-.alert .ok{color:var(--mut)}
-.section{margin:0 0 28px}
-.section h2{display:inline-block;font-size:12.5px;font-weight:700;letter-spacing:.03em;
-margin:0 0 12px;color:var(--head);background:var(--chip);padding:5px 14px;border-radius:999px}
-.grid{display:grid;gap:22px;grid-template-columns:1fr}
-.card{background:var(--card);border:1px solid var(--line);border-top:3px solid var(--line);
-border-radius:12px;padding:14px 16px 16px;overflow-x:auto;box-shadow:0 2px 8px rgba(16,24,40,.05)}
-.card.bkk{border-top-color:var(--accent)}
-.card.lch{border-top-color:var(--accent2)}
-.card h3{font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--head);margin:0 0 10px}
-.side-tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.05em;
-margin:0 0 10px;padding:3px 10px;border-radius:6px}
-.side-tag.bkk{background:var(--chip);color:var(--accent)}
-.side-tag.lch{background:#fdecec;color:var(--accent2)}
-table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
-th,td{padding:5px 7px;text-align:right;border:1px solid var(--grid);white-space:nowrap}
-th:first-child,td:first-child,th:nth-child(2),td:nth-child(2){text-align:left}
-thead th{font-size:11px;color:var(--ink);font-weight:700;background:var(--headbg)}
-thead tr:first-child th[colspan]{text-align:center;background:var(--headbg);color:var(--ink);
-font-size:11px;text-transform:uppercase;letter-spacing:.03em;padding:6px 4px}
-thead tr:first-child th.blk2{color:var(--depot)}
-tr.total td{font-weight:700;background:var(--headbg);border-top:2px solid var(--grid)}
-td.depot,th.depot{color:var(--depot)}
-td.type{color:var(--ink);font-size:11.5px}
-td.neg{color:var(--neg);font-weight:700;background:var(--negbg)}
-.zero{color:var(--line)}
-th.divider,td.divider{border-left:2px solid var(--grid)}
-footer{margin-top:30px;color:var(--mut);font-size:12px;text-align:center}
+.zone-title{display:flex;align-items:center;gap:10px;margin:16px 0 8px;color:var(--navy);font-weight:800;font-size:15px}
+.side-tag{display:inline-block;font-weight:800;font-size:12.5px;letter-spacing:.04em;padding:4px 14px;border-radius:999px}
+.side-tag.bkk{background:var(--bkk-soft);color:var(--bkk)}
+.side-tag.lch{background:var(--lch-soft);color:var(--lch)}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.kpi{background:var(--card);border:1px solid var(--line);border-top:4px solid var(--c);border-radius:14px;
+padding:13px 16px;box-shadow:0 3px 10px rgba(15,35,60,.05)}
+.kpi .lbl{font-size:12.5px;color:var(--mut);font-weight:600}
+.kpi .num{font-size:30px;font-weight:800;color:var(--c);line-height:1.15;font-variant-numeric:tabular-nums;margin:2px 0}
+.kpi .sub2{font-size:12px;color:var(--mut)}
+.kpi.in{--c:var(--in)}.kpi.stock{--c:var(--stock)}.kpi.bkg{--c:var(--bkg)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12.5px;color:var(--mut);margin:18px 0 0;
+padding:10px 14px;background:rgba(255,255,255,.7);border:1px dashed var(--divider);border-radius:12px}
+.dot{display:inline-block;width:11px;height:11px;border-radius:3px;vertical-align:-1px;margin-right:6px}
+.section{margin:34px 0 0;scroll-margin-top:72px}
+.sec-head{display:flex;gap:12px;align-items:flex-start;margin:0 0 14px}
+.step{flex:none;width:32px;height:32px;border-radius:50%;background:var(--navy);color:#fff;font-weight:800;
+display:grid;place-items:center;font-size:15px}
+.sec-head h2{margin:0;font-size:19px;color:var(--navy);display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center}
+.range{font-size:12.5px;font-weight:700;color:var(--bkg);background:var(--bkg-soft);padding:3px 11px;border-radius:999px}
+.sec-head p{margin:3px 0 0;color:var(--mut);font-size:13px;max-width:900px}
+.grid{display:grid;gap:18px;grid-template-columns:1fr}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 4px 14px rgba(15,35,60,.06);overflow:hidden}
+.card.bkk{border-top:4px solid var(--bkk)}
+.card.lch{border-top:4px solid var(--lch)}
+.card-head{padding:12px 16px 2px}
+.tbl-wrap{overflow-x:auto;padding:6px 10px 14px}
+table{border-collapse:separate;border-spacing:0;width:100%;font-variant-numeric:tabular-nums;font-size:13px}
+th,td{padding:7px 9px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--grid)}
+th.loc,td.loc{text-align:left}
+td.loc{font-weight:700;position:sticky;left:0;z-index:1;background:#fff}
+td.type{text-align:left}
+thead th{font-size:11.5px;font-weight:700;color:#475569;background:#f4f7fb}
+thead tr.top th{text-align:center;font-size:12px;letter-spacing:.05em;text-transform:uppercase;padding:9px 6px}
+th.b-in{background:var(--in-soft);color:var(--in)}
+th.b-stock{background:var(--stock-soft);color:var(--stock)}
+th.b-bkg{background:var(--bkg-soft);color:var(--bkg)}
+th.b-bal{background:var(--bal-soft);color:var(--bal)}
+thead tr.sub th.b-in{background:var(--in-soft2)}
+thead tr.sub th.b-stock{background:var(--stock-soft2)}
+thead tr.sub th.b-bkg{background:var(--bkg-soft2)}
+thead tr.sub th.b-bal{background:var(--bal-soft2)}
+th.divider,td.divider{border-left:2px solid var(--divider)}
+tbody tr:nth-child(even) td{background:#fafcfe}
+tbody tr:hover td{background:#eaf2ff}
+td.depot{color:var(--depot)}
+td.neg{color:var(--neg)!important;font-weight:800;background:var(--negbg)!important}
+.zero{color:var(--zero)}
+.pill{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.03em;padding:2px 9px;border-radius:999px}
+.t-terminal{background:#e8eefc;color:#2a4a99}
+.t-icd{background:#efe8fb;color:#5b3aa6}
+.t-depot{background:#e1f0ff;color:#0b5ed7}
+tr.total td{font-weight:800;color:var(--navy);background:#eaeff6!important;border-top:2px solid #b8c4d6;border-bottom:none}
+.rf{max-width:760px}
+.rf tbody td:first-child{text-align:left;font-weight:700}
+.rf th.zone-bkk{background:var(--bkk-soft);color:var(--bkk)}
+.rf th.zone-lch{background:var(--lch-soft);color:var(--lch)}
+footer{margin-top:34px;color:var(--mut);font-size:12px;text-align:center}
+@media(max-width:900px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+.topbar{padding:16px 18px}h1{font-size:21px}.topbar img{height:40px}}
+@media(max-width:600px){.topbar{flex-direction:column;align-items:flex-start}.topbar img{height:34px}
+.toolbar{gap:6px;padding:8px 10px}.nav{flex-wrap:nowrap;overflow-x:auto;width:100%}
+.nav a{white-space:nowrap;padding:6px 10px}.kpi .num{font-size:26px}.wrap{padding:14px 12px 40px}}
 """
+
+DASH_JS = """
+(function(){
+  var buttons = Array.prototype.slice.call(document.querySelectorAll('.filter-btn'));
+  var zoned = document.querySelectorAll('[data-zone]');
+  function apply(filter){
+    for (var i = 0; i < zoned.length; i++) {
+      var z = zoned[i].getAttribute('data-zone');
+      zoned[i].classList.toggle('hide', filter !== 'all' && z !== filter);
+    }
+    buttons.forEach(function(b){ b.classList.toggle('active', b.dataset.filter === filter); });
+    try { localStorage.setItem('halStockFilter', filter); } catch (e) {}
+  }
+  buttons.forEach(function(b){
+    b.addEventListener('click', function(){ apply(b.dataset.filter); });
+  });
+  var saved = 'all';
+  try { saved = localStorage.getItem('halStockFilter') || 'all'; } catch (e) {}
+  apply(saved);
+
+  var links = Array.prototype.slice.call(document.querySelectorAll('.nav a'));
+  var secs = links.map(function(a){ return document.querySelector(a.getAttribute('href')); });
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (e.isIntersecting) {
+          links.forEach(function(a){ a.classList.toggle('on', a.getAttribute('href') === '#' + e.target.id); });
+        }
+      });
+    }, {rootMargin: '-30% 0px -60% 0px'});
+    secs.forEach(function(s){ if (s) io.observe(s); });
+  }
+})();
+"""
+
+ZONE_NAME = {"bkk": "THBKK · กรุงเทพ", "lch": "THLCH · แหลมฉบัง"}
+TH_DAYS = ["จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์", "อาทิตย์"]
+GP_TYPES = ("22GP", "42GP", "45GP")
+RE_TYPES = ("22RE", "45RE")
+
+
+def _num(v):
+    return f"{int(v):,}"
 
 
 def _mcell(v, neg=False, divider=False, depot=False):
@@ -614,39 +705,46 @@ def _mcell(v, neg=False, divider=False, depot=False):
     if depot:
         cls.append("depot")
     cls_str = f' class="{" ".join(cls)}"' if cls else ""
-    text = "·" if v == 0 else str(v)
+    text = "·" if v == 0 else _num(v)
     return f"<td{cls_str}>{text}</td>"
 
 
+def _type_pill(type_label):
+    if not type_label:
+        return ""
+    return f'<span class="pill t-{type_label.lower()}">{type_label}</span>'
+
+
 def _mrow(label, type_label, left_vals, right_vals, is_depot, right_neg_ok):
-    lcls = ' class="depot"' if is_depot else ""
+    lcls = "loc depot" if is_depot else "loc"
     left_cells = "".join(_mcell(int(left_vals[t]), depot=is_depot) for t in TEMPLATE_TYPES)
     right_cells = "".join(
         _mcell(int(right_vals[t]), neg=right_neg_ok, divider=(i == 0), depot=is_depot)
         for i, t in enumerate(TEMPLATE_TYPES)
     )
-    return f"<tr><td{lcls}>{label}</td><td class='type'>{type_label}</td>{left_cells}{right_cells}</tr>"
+    return (f"<tr><td class='{lcls}'>{label}</td>"
+            f"<td class='type'>{_type_pill(type_label)}</td>{left_cells}{right_cells}</tr>")
 
 
 def _mtotal(left_tot, right_tot):
-    left_cells = "".join(f"<td>{left_tot[t] or ''}</td>" for t in TEMPLATE_TYPES)
+    left_cells = "".join(f"<td>{_num(left_tot[t]) if left_tot[t] else ''}</td>" for t in TEMPLATE_TYPES)
     right_cells = "".join(
-        f'<td class="divider">{right_tot[t] or ""}</td>' if i == 0 else f"<td>{right_tot[t] or ''}</td>"
+        (f'<td class="divider">{_num(right_tot[t]) if right_tot[t] else ""}</td>' if i == 0
+         else f"<td>{_num(right_tot[t]) if right_tot[t] else ''}</td>")
         for i, t in enumerate(TEMPLATE_TYPES)
     )
-    return f"<tr class='total'><td>TOTAL</td><td></td>{left_cells}{right_cells}</tr>"
+    return f"<tr class='total'><td class='loc'>TOTAL</td><td></td>{left_cells}{right_cells}</tr>"
 
 
 def _merged_table(side_label, side_cls, groups, left, right, left_title, right_title,
-                  right_neg_ok=False, extra_rows=None):
+                  right_neg_ok=False, extra_rows=None, left_cls="b-in", right_cls="b-stock"):
     """One BKK/LCH card: Location + Type + a 9-col left block + a 9-col right block
-    (divider rule on the right block's first column) - e.g. FULL INBOUND | CURRENT
-    STOCK, or BOOKING | STOCK BALANCE END WK. extra_rows: optional
-    [(label, left_vals, right_vals, is_depot), ...] appended before TOTAL, e.g.
-    REPO (E/P) which isn't tied to a location group."""
-    left_head = "".join(f"<th>{t}</th>" for t in TEMPLATE_TYPES)
-    right_head = (f'<th class="divider">{TEMPLATE_TYPES[0]}</th>'
-                  + "".join(f"<th>{t}</th>" for t in TEMPLATE_TYPES[1:]))
+    (divider rule on the right block's first column), blocks colour-coded by
+    left_cls / right_cls. extra_rows: optional [(label, left_vals, right_vals,
+    is_depot), ...] appended before TOTAL, e.g. REPO (E/P)."""
+    left_head = "".join(f'<th class="{left_cls}">{t}</th>' for t in TEMPLATE_TYPES)
+    right_head = (f'<th class="divider {right_cls}">{TEMPLATE_TYPES[0]}</th>'
+                  + "".join(f'<th class="{right_cls}">{t}</th>' for t in TEMPLATE_TYPES[1:]))
     rows = []
     tot_l = {t: 0 for t in TEMPLATE_TYPES}
     tot_r = {t: 0 for t in TEMPLATE_TYPES}
@@ -661,14 +759,53 @@ def _merged_table(side_label, side_cls, groups, left, right, left_title, right_t
             tot_l[t] += int(lv[t]); tot_r[t] += int(rv[t])
         rows.append(_mrow(label, "", lv, rv, is_depot, right_neg_ok))
     rows.append(_mtotal(tot_l, tot_r))
-    return (f'<div class="card {side_cls}"><div class="side-tag {side_cls}">{side_label}</div>'
-            f"<table><thead><tr><th rowspan='2'>Location</th><th rowspan='2'>Type</th>"
-            f"<th colspan='9'>{left_title}</th><th colspan='9' class=\"divider blk2\">{right_title}</th></tr>"
-            f"<tr>{left_head}{right_head}</tr></thead><tbody>{''.join(rows)}</tbody></table></div>")
+    return (f'<div class="card {side_cls}" data-zone="{side_cls}">'
+            f'<div class="card-head"><span class="side-tag {side_cls}">{ZONE_NAME[side_cls]}</span></div>'
+            f'<div class="tbl-wrap"><table><thead>'
+            f"<tr class='top'><th rowspan='2' class='loc'>Location</th><th rowspan='2'>Type</th>"
+            f"<th colspan='9' class='{left_cls}'>{left_title}</th>"
+            f"<th colspan='9' class='divider {right_cls}'>{right_title}</th></tr>"
+            f"<tr class='sub'>{left_head}{right_head}</tr></thead>"
+            f"<tbody>{''.join(rows)}</tbody></table></div></div>")
 
 
-def _msection(title, bkk_card, lch_card):
-    return f"<div class='section'><h2>{title}</h2><div class='grid'>{bkk_card}{lch_card}</div></div>"
+def _msection(sec_id, step, title, desc, bkk_card, lch_card, rng=None):
+    chip = f'<span class="range">{rng}</span>' if rng else ""
+    return (f"<section class='section' id='{sec_id}'><div class='sec-head'><div class='step'>{step}</div>"
+            f"<div><h2>{title}{chip}</h2><p>{desc}</p></div></div>"
+            f"<div class='grid'>{bkk_card}{lch_card}</div></section>")
+
+
+def _kpi_sub(data, groups, extra=None):
+    """(grand total, 'GP x · RE y · อื่นๆ z') for `data` summed over `groups`."""
+    tot = {t: sum(int(data[g][t]) for g in groups) + (int(extra[t]) if extra else 0)
+           for t in TEMPLATE_TYPES}
+    gp = sum(tot[t] for t in GP_TYPES)
+    re_ = sum(tot[t] for t in RE_TYPES)
+    other = sum(tot.values()) - gp - re_
+    sub = f"GP {gp:,} · RE {re_:,}" + (f" · อื่นๆ {other:,}" if other else "")
+    return sum(tot.values()), sub
+
+
+def _kpi_card(kind, label, total, sub):
+    return (f"<div class='kpi {kind}'><div class='lbl'>{label}</div>"
+            f"<div class='num'>{total:,}</div><div class='sub2'>{sub}</div></div>")
+
+
+def _kpi_zone(side_cls, groups, fi, cs, bk1, bk2, repo_side, wk1_lbl, wk2_lbl):
+    stock_n, stock_sub = _kpi_sub(cs, groups, repo_side)
+    if any(repo_side.values()):
+        stock_sub += f" · รวม REPO (E/P) {sum(int(v) for v in repo_side.values()):,}"
+    in_n, in_sub = _kpi_sub(fi, groups)
+    b1_n, b1_sub = _kpi_sub(bk1, groups)
+    b2_n, b2_sub = _kpi_sub(bk2, groups)
+    cards = (_kpi_card("stock", "ตู้เปล่าในสต๊อก (CURRENT STOCK)", stock_n, stock_sub)
+             + _kpi_card("in", "ตู้ FULL ขาเข้า รอ devanning (FULL INBOUND)", in_n, in_sub)
+             + _kpi_card("bkg", f"บุ๊คกิ้ง WK1ST · {wk1_lbl}", b1_n, b1_sub)
+             + _kpi_card("bkg", f"บุ๊คกิ้ง WK2ND · {wk2_lbl}", b2_n, b2_sub))
+    return (f"<div data-zone='{side_cls}'><div class='zone-title'>"
+            f"<span class='side-tag {side_cls}'>{ZONE_NAME[side_cls]}</span>ภาพรวมวันนี้</div>"
+            f"<div class='kpis'>{cards}</div></div>")
 
 
 def write_dashboard(path, report_date, wk1_lbl, wk2_lbl,
@@ -677,88 +814,110 @@ def write_dashboard(path, report_date, wk1_lbl, wk2_lbl,
         "BKK": [("REPO (E/P)", _empty_counts(), repo["BKK"], True)],
         "LCH": [("REPO (E/P)", _empty_counts(), repo["LCH"], True)],
     }
+    kpis_html = (_kpi_zone("bkk", BKK_GROUPS, fi, cs, bk1, bk2, repo["BKK"], wk1_lbl, wk2_lbl)
+                 + _kpi_zone("lch", LCH_GROUPS, fi, cs, bk1, bk2, repo["LCH"], wk1_lbl, wk2_lbl))
+
     sec1 = _msection(
-        "FULL INBOUND &amp; CURRENT STOCK",
+        "s-stock", 1, "สต๊อก &amp; ตู้ขาเข้า",
+        "<b>FULL INBOUND</b> = ตู้ FULL ที่ถึงแล้ว รอ devanning &nbsp;·&nbsp; "
+        "<b>CURRENT STOCK</b> = ตู้เปล่าคงเหลือในลาน (<b>REPO (E/P)</b> = ตู้เปล่าที่ย้ายเข้ามา)",
         _merged_table("BKK", "bkk", BKK_GROUPS, fi, cs, "FULL INBOUND", "CURRENT STOCK",
-                      extra_rows=repo_extra["BKK"]),
+                      extra_rows=repo_extra["BKK"], left_cls="b-in", right_cls="b-stock"),
         _merged_table("LCH", "lch", LCH_GROUPS, fi, cs, "FULL INBOUND", "CURRENT STOCK",
-                      extra_rows=repo_extra["LCH"]),
+                      extra_rows=repo_extra["LCH"], left_cls="b-in", right_cls="b-stock"),
     )
     sec2 = _msection(
-        f"BOOKING &amp; STOCK BALANCE END WK &nbsp;{wk1_lbl}",
-        _merged_table("BKK", "bkk", BKK_GROUPS, bk1, sew1,
-                      f"BOOKING {wk1_lbl}", f"STOCK BALANCE END WK {wk1_lbl}", right_neg_ok=True),
-        _merged_table("LCH", "lch", LCH_GROUPS, bk1, sew1,
-                      f"BOOKING {wk1_lbl}", f"STOCK BALANCE END WK {wk1_lbl}", right_neg_ok=True),
+        "s-wk1", 2, "บุ๊คกิ้ง &amp; สต๊อกคงเหลือ · WK1ST",
+        "<b>BOOKING</b> = ตู้ที่ลูกค้าจองรับ (รวมบุ๊คที่ค้างรับ) &nbsp;·&nbsp; "
+        "<b>STOCK BALANCE END</b> = ตู้เปล่าคงเหลือหลังหักบุ๊คกิ้ง "
+        "<span style='color:var(--neg);font-weight:700'>ตัวเลขแดง = ไม่พอ (ติดลบ)</span>",
+        _merged_table("BKK", "bkk", BKK_GROUPS, bk1, sew1, "BOOKING", "STOCK BALANCE END",
+                      right_neg_ok=True, left_cls="b-bkg", right_cls="b-bal"),
+        _merged_table("LCH", "lch", LCH_GROUPS, bk1, sew1, "BOOKING", "STOCK BALANCE END",
+                      right_neg_ok=True, left_cls="b-bkg", right_cls="b-bal"),
+        rng=wk1_lbl,
     )
     sec3 = _msection(
-        f"BOOKING &amp; STOCK BALANCE END WK &nbsp;{wk2_lbl}",
-        _merged_table("BKK", "bkk", BKK_GROUPS, bk2, sew2,
-                      f"BOOKING {wk2_lbl}", f"STOCK BALANCE END WK {wk2_lbl}", right_neg_ok=True),
-        _merged_table("LCH", "lch", LCH_GROUPS, bk2, sew2,
-                      f"BOOKING {wk2_lbl}", f"STOCK BALANCE END WK {wk2_lbl}", right_neg_ok=True),
+        "s-wk2", 3, "บุ๊คกิ้ง &amp; สต๊อกคงเหลือ · WK2ND",
+        "หักบุ๊คกิ้งสัปดาห์ถัดไป <b>ต่อจาก WK1ST</b> &nbsp;·&nbsp; "
+        "<b>STOCK BALANCE END</b> = สต๊อกคงเหลือของ WK1ST หักบุ๊ค WK2ND",
+        _merged_table("BKK", "bkk", BKK_GROUPS, bk2, sew2, "BOOKING", "STOCK BALANCE END",
+                      right_neg_ok=True, left_cls="b-bkg", right_cls="b-bal"),
+        _merged_table("LCH", "lch", LCH_GROUPS, bk2, sew2, "BOOKING", "STOCK BALANCE END",
+                      right_neg_ok=True, left_cls="b-bkg", right_cls="b-bal"),
+        rng=wk2_lbl,
     )
     sections_html = sec1 + sec2 + sec3
 
-    # RF SEASONAL mini-table
+    # RF SEASONAL - 45RE reefers by build year x brand
+    brands = ("CARRIER", "DAIKIN", "TRMK")
     rf_rows = []
+    tot = {(a, c): 0 for a in ("BKK", "LCH") for c in brands}
     for y in RF_SEASONAL_YEARS:
-        b = [rf[("BKK", y, c)] for c in ("CARRIER", "DAIKIN", "TRMK")]
-        l = [rf[("LCH", y, c)] for c in ("CARRIER", "DAIKIN", "TRMK")]
-        rf_rows.append("<tr><td>{}</td>{}{}</tr>".format(
-            y, "".join(f"<td>{x or ''}</td>" for x in b),
-            "".join(f"<td>{x or ''}</td>" for x in l)))
+        cells = ""
+        for a in ("BKK", "LCH"):
+            for c in brands:
+                v = rf[(a, y, c)]
+                tot[(a, c)] += v
+                cls = ' class="divider"' if (a == "LCH" and c == "CARRIER") else ""
+                cells += f"<td{cls}>{v or ''}</td>"
+        rf_rows.append(f"<tr><td>{y}</td>{cells}</tr>")
+    tcells = "".join(
+        (f'<td class="divider">{tot[(a, c)]}</td>' if (a == "LCH" and c == "CARRIER")
+         else f"<td>{tot[(a, c)]}</td>")
+        for a in ("BKK", "LCH") for c in brands)
+    rf_rows.append(f"<tr class='total'><td>TOTAL</td>{tcells}</tr>")
+    rf_card = (
+        "<div class='card rf'><div class='tbl-wrap'><table><thead>"
+        "<tr class='top'><th rowspan='2' class='loc'>ปีผลิต</th>"
+        "<th colspan='3' class='zone-bkk'>THBKK</th><th colspan='3' class='divider zone-lch'>THLCH</th></tr>"
+        "<tr class='sub'><th>CARRIER</th><th>DAIKIN</th><th>TRMK</th>"
+        "<th class='divider'>CARRIER</th><th>DAIKIN</th><th>TRMK</th></tr></thead>"
+        f"<tbody>{''.join(rf_rows)}</tbody></table></div></div>")
     rf_html = (
-        "<div class='card' style='margin-top:22px'><h3>RF SEASONAL &mdash; 45RE by year built</h3>"
-        "<table><thead><tr><th>Year</th><th>BKK CAR</th><th>BKK DAI</th><th>BKK TRMK</th>"
-        "<th>LCH CAR</th><th>LCH DAI</th><th>LCH TRMK</th></tr></thead><tbody>"
-        + "".join(rf_rows) + "</tbody></table></div>")
+        "<section class='section' id='s-rf'><div class='sec-head'><div class='step'>4</div><div>"
+        "<h2>RF SEASONAL <span class='range' style='color:var(--stock);background:var(--stock-soft)'>45RE</span></h2>"
+        "<p>จำนวนตู้ reefer 45RE ในสต๊อก แยกตามปีผลิตและยี่ห้อเครื่องทำความเย็น "
+        "(CARRIER · DAIKIN · TRMK = Thermo King)</p></div></div>"
+        f"{rf_card}</section>")
 
+    weekday = TH_DAYS[report_date.weekday()]
     html = f"""<!doctype html><html lang="th"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Stock Report HQ &ndash; {report_date:%Y-%m-%d}</title>
 <style>{DASH_CSS}</style></head><body>
 <div class="accent-bar"></div>
 <div class="wrap">
-<div class="topbar">
+<header class="topbar">
 <div><h1>Stock Report HQ</h1>
-<p class="sub">รายงานประจำวันที่ {report_date:%d/%m/%Y} ({report_date:%A})</p></div>
-<div class="topbar-right">
+<p class="sub">รายงานสต๊อกตู้ประจำวันที่ {report_date:%d/%m/%Y} (วัน{weekday})</p></div>
 <img src="logo.png" alt="logo">
-</div>
-</div>
+</header>
+<div class="toolbar">
 <div class="filter-bar">
 <button type="button" class="filter-btn active" data-filter="all">ALL</button>
 <button type="button" class="filter-btn" data-filter="bkk">THBKK</button>
 <button type="button" class="filter-btn" data-filter="lch">THLCH</button>
 </div>
+<nav class="nav">
+<a href="#s-stock">สต๊อก &amp; ตู้ขาเข้า</a><a href="#s-wk1">WK1ST</a><a href="#s-wk2">WK2ND</a><a href="#s-rf">RF SEASONAL</a>
+</nav>
+</div>
+{kpis_html}
+<div class="legend">
+<span><i class="dot" style="background:var(--in)"></i>FULL INBOUND (ตู้ FULL)</span>
+<span><i class="dot" style="background:var(--stock)"></i>CURRENT STOCK (ตู้เปล่า)</span>
+<span><i class="dot" style="background:var(--bkg)"></i>BOOKING (ลูกค้าจอง)</span>
+<span><i class="dot" style="background:var(--bal)"></i>STOCK BALANCE END (คงเหลือ)</span>
+<span style="color:var(--depot)"><b>น้ำเงิน</b> = DEPOT</span>
+<span style="color:var(--neg)"><b>แดง</b> = ติดลบ</span>
+<span><b>·</b> = 0</span>
+</div>
 {sections_html}
 {rf_html}
 <footer>สร้างอัตโนมัติจาก build_stock_hq.py &middot; ตัวเลขเป็นยอดรวมรายกลุ่มสถานที่ (ไม่มีชื่อลูกค้า/เลขบุ๊คกิ้ง)</footer>
 </div>
-<script>
-(function(){{
-  var buttons = Array.prototype.slice.call(document.querySelectorAll('.filter-btn'));
-  var bkkCards = document.querySelectorAll('.card.bkk');
-  var lchCards = document.querySelectorAll('.card.lch');
-  function apply(filter){{
-    for (var i = 0; i < bkkCards.length; i++) {{
-      bkkCards[i].classList.toggle('hide', filter === 'lch');
-    }}
-    for (var j = 0; j < lchCards.length; j++) {{
-      lchCards[j].classList.toggle('hide', filter === 'bkk');
-    }}
-    buttons.forEach(function(b){{ b.classList.toggle('active', b.dataset.filter === filter); }});
-    try {{ localStorage.setItem('halStockFilter', filter); }} catch (e) {{}}
-  }}
-  buttons.forEach(function(b){{
-    b.addEventListener('click', function(){{ apply(b.dataset.filter); }});
-  }});
-  var saved = 'all';
-  try {{ saved = localStorage.getItem('halStockFilter') || 'all'; }} catch (e) {{}}
-  apply(saved);
-}})();
-</script>
+<script>{DASH_JS}</script>
 </body></html>"""
     with open(path, "w", encoding="utf-8") as fh:
         fh.write(html)
