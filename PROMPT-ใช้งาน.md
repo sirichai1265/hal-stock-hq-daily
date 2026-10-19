@@ -44,7 +44,7 @@
 
 ไฟล์ต้นทาง (จับคู่ตามเนื้อหา ไม่ยึดชื่อไฟล์ ใช้ชีทชื่อ "Sheet"):
 - ACTUAL = FULL INBOUND: นับตาม Location+Size/Type ที่ Move Code ไม่ใช่ OFD
-- STAYING = CURRENT STOCK: นับตาม Location+Size/Type
+- STAYING = CURRENT STOCK: นับตาม Location+Size/Type (ไม่นับ Move Code OEP, OEV, OEW)
 - PENDING + BKG-3WK = BOOKING (รวมสองไฟล์, BK No ซ้ำให้ใช้ตัวหลัง,
   ตัดแถวสรุปท้ายไฟล์, หัวตารางอาจอยู่แถว 0 หรือ 1)
 - EMPTY = REPO (E/P) แถว 14: THBKK -> L14:T14, THLCH -> AG14:AO14

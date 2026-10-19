@@ -22,7 +22,7 @@ python build_stock_hq.py --publish             # + push dashboard ขึ้น G
 | ไฟล์ | ใช้คำนวณ |
 |---|---|
 | `*ACTUAL*.xls` | FULL INBOUND (ตู้ FULL คงเหลือ, Move Code ≠ OFD) |
-| `*STAYING*.xls` | CURRENT STOCK + RF SEASONAL |
+| `*STAYING*.xls` | CURRENT STOCK + RF SEASONAL (ไม่นับ Move Code OEP, OEV, OEW) |
 | `*PENDING*.xls` + `*BKG*.xls` | BOOKING (รวมสองไฟล์ ถ้ามีไฟล์เดียวก็ใช้ไฟล์เดียว) |
 | `*EMPTY*.xls` (ไม่บังคับ) | REPO (E/P) แถว 14 — THBKK → L14:T14, THLCH → AG14:AO14 |
 

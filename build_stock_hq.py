@@ -162,9 +162,19 @@ def load_booking_all(paths):
     return df
 
 
+# STAYING rows with these Move Codes are not counted (user rule 2026-10-19:
+# "STAYING ไม่นับ OEP, OEV, OEW") - applies to CURRENT STOCK and RF SEASONAL.
+STAYING_EXCLUDE_MOVES = {"OEP", "OEV", "OEW"}
+
+
 def load_staying(path):
     df = load_data_sheet(path, header=0)
-    return df[df["Location"].notna()].copy()
+    df = df[df["Location"].notna()].copy()
+    skip = df["Move Code"].astype(str).str.strip().str.upper().isin(STAYING_EXCLUDE_MOVES)
+    if skip.any():
+        counts = df.loc[skip, "Move Code"].astype(str).str.upper().value_counts().to_dict()
+        print(f"  STAYING: excluded {int(skip.sum())} rows by Move Code {counts}")
+    return df[~skip].copy()
 
 
 def load_actual(path):
