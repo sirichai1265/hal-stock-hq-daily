@@ -220,9 +220,25 @@ def current_stock(stay):
     return out
 
 
+ACTUAL_MAX_DAYS = 30
+
+
 def full_inbound(actual):
-    """FULL INBOUND: ACTUAL rows by group + type where Move Code != 'OFD'."""
-    inb = actual[actual["Move Code"].astype(str).str.upper() != "OFD"]
+    """FULL INBOUND: ACTUAL rows by group + type. User rules (2026-10-21):
+    - Move Code OFD is not counted;
+    - containers older than 30 days (Days > 30) are not counted;
+    - IFV whose BKNO(Cur) starts with HASLS22 is not counted, but an IFV within
+      30 days is counted (as IFI) - so in effect an IFV counts only while Days <= 30."""
+    mc = actual["Move Code"].astype(str).str.strip().str.upper()
+    days = pd.to_numeric(actual["Days"], errors="coerce").fillna(0) if "Days" in actual.columns else 0
+    within = days <= ACTUAL_MAX_DAYS
+    drop = (mc == "OFD") | ~within
+    inb = actual[~drop].copy()
+    n_old = int((~within & (mc != "OFD")).sum())
+    n_ifv = int(((mc == "IFV") & ~drop).sum())
+    if n_old or n_ifv:
+        print(f"  ACTUAL: excluded {n_old} rows older than {ACTUAL_MAX_DAYS} days; "
+              f"{n_ifv} IFV within {ACTUAL_MAX_DAYS} days counted as IFI")
     out = {}
     for group, codes in GROUP_CODES.items():
         sub = inb[inb["Location"].isin(codes)]

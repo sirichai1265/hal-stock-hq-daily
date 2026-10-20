@@ -43,7 +43,7 @@
 22GP 42GP 45GP 22RE 45RE 22UT 42UT 22PC 42PC
 
 ไฟล์ต้นทาง (จับคู่ตามเนื้อหา ไม่ยึดชื่อไฟล์ ใช้ชีทชื่อ "Sheet"):
-- ACTUAL = FULL INBOUND: นับตาม Location+Size/Type ที่ Move Code ไม่ใช่ OFD
+- ACTUAL = FULL INBOUND: นับตาม Location+Size/Type ไม่นับ OFD, ไม่นับตู้เกิน 30 days (คอลัมน์ Days), IFV ที่ BKNO(Cur) ขึ้นต้น HASLS22 ไม่นับ แต่ IFV ไม่เกิน 30 days นับเป็น IFI
 - STAYING = CURRENT STOCK: นับตาม Location+Size/Type (ไม่นับ Move Code OEP, OEV, OEW)
 - PENDING + BKG-3WK = BOOKING (รวมสองไฟล์, BK No ซ้ำให้ใช้ตัวหลัง,
   ตัดแถวสรุปท้ายไฟล์, หัวตารางอาจอยู่แถว 0 หรือ 1)
