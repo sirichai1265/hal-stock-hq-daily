@@ -370,7 +370,9 @@ def hide_zero_format(ws, row, col_letters):
         ws[f"{col}{row}"].number_format = ZERO_HIDE_FORMAT
 
 
-def build(actual_path, bkg_paths, staying_path, report_date, out_path, ep2_path=None):
+def build(actual_path, bkg_paths, staying_path, report_date, out_path, ep2_path=None, sinokor_path=None):
+    global NAV_COMPARE
+    NAV_COMPARE = bool(sinokor_path)
     if isinstance(bkg_paths, str):
         bkg_paths = [bkg_paths]
     actual = load_actual(actual_path)
@@ -518,7 +520,11 @@ def build(actual_path, bkg_paths, staying_path, report_date, out_path, ep2_path=
                     os.path.basename(out_path))
     write_overview(os.path.join(os.path.dirname(dash), "overview.html"), report_date,
                    wk1_lbl, wk2_lbl, fi, cs, bk1, bk2, bal, repo)
-    print(f"Dashboard   : {os.path.basename(dash)} + overview.html")
+    if sinokor_path:
+        write_compare(os.path.join(os.path.dirname(dash), "compare.html"), report_date,
+                      load_sinokor(sinokor_path), fi, cs, bk1, bk2, bal, repo)
+    print(f"Dashboard   : {os.path.basename(dash)} + overview.html"
+          + (" + compare.html" if sinokor_path else ""))
 
     # ---- console report -------------------------------------------------- #
     print(f"\nReport date : {report_date:%Y-%m-%d} ({report_date:%A})")
@@ -876,7 +882,7 @@ def _nf_zone(zone, cs, fi, bk1, bk2, repo_side, bal_side, wk1_lbl, wk2_lbl):
 
 OV_CSS = """
 body{background:#eaf0f7}
-.ov{max-width:1240px;margin:0 auto;padding:22px 20px 48px}
+.ov{max-width:1320px;margin:0 auto;padding:22px 20px 48px}
 .ov-banner{position:relative;height:158px;border-radius:18px;overflow:hidden;
 background:#32414f url('header.jpg') center 38%/cover;box-shadow:0 8px 22px rgba(15,35,60,.18)}
 .ov-banner:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,30,45,0) 25%,rgba(15,30,45,.62) 100%)}
@@ -905,7 +911,7 @@ padding:16px 20px 12px;overflow-x:auto}
 .cc-u{text-align:right}
 .cc-u b{display:block;font:700 26px ui-monospace,Consolas,Menlo,monospace;color:#16222f;line-height:1.1}
 .cc-u small{color:#8a97a6;font-size:11px;letter-spacing:.08em}
-table.ct{width:100%;border-collapse:collapse;min-width:640px;font-family:ui-monospace,Consolas,Menlo,monospace;font-size:14px}
+table.ct{width:100%;border-collapse:collapse;min-width:520px;font-family:ui-monospace,Consolas,Menlo,monospace;font-size:14px}
 .ct th{background:#f2f6fa;color:#8a97a6;font:600 11.5px "Segoe UI",sans-serif;padding:7px 8px;text-align:right}
 .ct th:first-child,.ct td:first-child{text-align:left}
 .ct td{padding:8px 8px;text-align:right;border-bottom:1px solid #e8eef4;color:#2b3a4a}
@@ -930,6 +936,15 @@ background:#e2e8f0;color:#475569;vertical-align:1px}
 .badge.dep{background:#dbeafe;color:#1d4ed8}
 .gt td.dash{color:#cbd5e1}
 .gt tr.tot td{border-top:2px solid var(--navy);font-weight:800;color:var(--navy);border-bottom:0}
+.cards2{display:grid;grid-template-columns:repeat(auto-fit,minmax(540px,1fr));gap:18px}
+.cards2 .ccard{min-width:0;padding:14px 14px 10px}
+.cards2 .ct{min-width:0;font-size:12.5px}
+.cards2 .ct td,.cards2 .ct th{padding-left:3px;padding-right:3px}
+.cards2 .ct td:first-child{font-size:12px;white-space:normal;width:84px;line-height:1.25}
+.cards2 .ct tr.cur td:first-child{font-size:13px}
+.cards2 .ct tr.cur td{font-size:14px}
+.cards2 .pill{min-width:0;padding:3px 5px;font-size:12px}
+.ccard.skr{border-left-color:#c0392b}.ccard.skr .cc-n i{background:#c0392b}.ccard.skr .cc-n b{color:#c0392b}
 .ov-leg{display:flex;flex-wrap:wrap;gap:18px;margin:26px 0 0;padding-top:14px;border-top:1px solid #cfd8e3;color:#5b6b7c;font-size:12.5px}
 .ov-leg span:before{content:"";display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;vertical-align:-1px;background:var(--c)}
 .ov-leg .sur{--c:#1d5fa8}.ov-leg .nor{--c:#15803d}.ov-leg .tig{--c:#946400}.ov-leg .sho{--c:#b42318}
@@ -941,8 +956,13 @@ _MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct",
 _ZONE_NAME = {"bkk": ("Bangkok", "THBKK"), "lch": ("Laem Chabang", "THLCH")}
 
 
+NAV_COMPARE = False     # set by build(): True when a SINOKOR file was supplied (compare.html exists)
+
+
 def _nav(active):
-    items = (("index", "index.html", "📋 ตารางรายงาน"), ("overview", "overview.html", "📊 ภาพรวม"))
+    items = [("index", "index.html", "📋 ตารางรายงาน"), ("overview", "overview.html", "📊 ภาพรวม")]
+    if NAV_COMPARE:
+        items.append(("compare", "compare.html", "⚖️ SINOKOR vs HEUNG A"))
     links = []
     for key, href, label in items:
         on = " class='on'" if key == active else ""
@@ -962,6 +982,119 @@ def _bal_class(bal, demand):
     return "p-tig" if cover < 1 else ("p-nor" if cover <= 3 else "p-sur")
 
 
+def _ct_table(stock, fin, b1, b2, bal):
+    """The 5-row type table (Current stock / MT return / Booking this+next wk / Balance pills)."""
+    def row(label, vals, cls=""):
+        cells = "".join("<td class='z'>–</td>" if int(vals[t]) == 0 else f"<td>{int(vals[t]):,}</td>"
+                        for t in TEMPLATE_TYPES)
+        return f"<tr class='{cls}'><td>{label}</td>{cells}</tr>"
+
+    pills = "".join(
+        f"<td><span class='pill {_bal_class(int(bal[t]), int(b1[t]) + int(b2[t]))}'>{int(bal[t]):,}</span></td>"
+        for t in TEMPLATE_TYPES)
+    head = "".join(f"<th>{t}</th>" for t in TEMPLATE_TYPES)
+    return (f"<table class='ct'><thead><tr><th>TYPE</th>{head}</tr></thead><tbody>"
+            + row("Current stock", stock, "cur")
+            + row("MT return (inbound)", fin)
+            + row("Booking, this wk", b1)
+            + row("Booking, next wk", b2)
+            + f"<tr class='bal'><td>Balance</td>{pills}</tr></tbody></table>")
+
+
+def _card(kind, name, loc, v):
+    """One company card. kind: 'skr' (red) or '' (blue, HEUNG A)."""
+    return (f"<div class='ccard {kind}'><div class='cc-h'><div class='cc-n'><i></i><div><b>{name}</b>"
+            f"<small>{loc}</small></div></div><div class='cc-u'><b>{sum(int(x) for x in v['stock'].values()):,}</b>"
+            f"<small>UNITS ON HAND</small></div></div>"
+            f"{_ct_table(v['stock'], v['fin'], v['b1'], v['b2'], v['bal'])}</div>")
+
+
+def _hal_vals(zone, cs, fi, bk1, bk2, repo_side, bal_side):
+    groups = XL_ZONES[zone]["groups"]
+    return {"stock": {t: _xl_sum(cs, groups)[t] + int(repo_side[t]) for t in TEMPLATE_TYPES},
+            "fin": _xl_sum(fi, groups), "b1": _xl_sum(bk1, groups), "b2": _xl_sum(bk2, groups),
+            "bal": {t: int(bal_side[t]) for t in TEMPLATE_TYPES}}
+
+
+def _num(v):
+    return int(v) if isinstance(v, (int, float)) and not isinstance(v, bool) else 0
+
+
+def load_sinokor(path):
+    """SINOKOR's 'Daily Container Stock' workbook -> per zone {stock, fin, b1, b2, bal, l1, l2}
+    read from its 'New Format' sheet (blocks SKR-THBKK / SKR-THLCH, cached values)."""
+    wb = openpyxl.load_workbook(path, data_only=True)
+    name = next((n for n in wb.sheetnames if n.strip().lower() == "new format"), None)
+    if not name:
+        raise SystemExit(f"{os.path.basename(path)}: sheet 'New Format' not found - sheets: {wb.sheetnames}")
+    ws = wb[name]
+    out = {}
+    for r in range(1, ws.max_row + 1):
+        tag = str(ws.cell(r, 1).value or "").strip().upper()
+        if tag not in ("SKR-THBKK", "SKR-THLCH"):
+            continue
+        blk = {}
+        for rr in range(r + 1, r + 10):
+            lab = str(ws.cell(rr, 1).value or "").strip()
+            low = lab.lower()
+            vals = {t: _num(ws.cell(rr, 2 + i).value) for i, t in enumerate(TEMPLATE_TYPES)}
+            rng = re.search(r"\((.*?)\)", lab)
+            if low.startswith("current stock"):
+                blk["stock"] = vals
+            elif low.startswith("ied"):
+                blk["fin"] = vals
+            elif low.startswith("booking"):
+                k = "b1" if "b1" not in blk else "b2"
+                blk[k] = vals
+                blk["l" + k[1]] = rng.group(1) if rng else ""
+            elif low.startswith("balance"):
+                blk["bal"] = vals
+        missing = [k for k in ("stock", "fin", "b1", "b2", "bal") if k not in blk]
+        if missing:
+            raise SystemExit(f"{os.path.basename(path)}: {tag} block lacks {missing}")
+        out["BKK" if tag.endswith("THBKK") else "LCH"] = blk
+    if set(out) != {"BKK", "LCH"}:
+        raise SystemExit(f"{os.path.basename(path)}: expected SKR-THBKK and SKR-THLCH blocks, found {sorted(out)}")
+    return out
+
+
+def write_compare(path, report_date, skr, fi, cs, bk1, bk2, bal, repo):
+    date_txt = f"{report_date.day} {_MONTHS[report_date.month - 1]} {report_date.year}"
+    secs = ""
+    for zone in ("bkk", "lch"):
+        name, th = _ZONE_NAME[zone]
+        side = zone.upper()
+        hal = _hal_vals(zone, cs, fi, bk1, bk2, repo[side], bal[side])
+        secs += (f"<section data-zone='{zone}'><div class='zone-h'><h2>{name}</h2><small>{th}</small></div>"
+                 f"<div class='cards2'>{_card('skr', 'SINOKOR', name, skr[side])}"
+                 f"{_card('', 'HEUNG A', name, hal)}</div></section>")
+    wk = skr["BKK"]
+    html = f"""<!doctype html><html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Stock Report HQ &ndash; SINOKOR vs HEUNG A {report_date:%Y-%m-%d}</title>
+<style>{DASH_CSS}{OV_CSS}</style></head><body>
+<div class="ov">
+<header class="ov-banner"><div class="bt"><h1>Container Stock Condition</h1>
+<div class="bs">SINOKOR vs HEUNG A</div></div><div class="bd">{date_txt}</div></header>
+<div class="ov-bar">{_nav("compare")}
+<div class="toolbar">
+<button type="button" class="filter-btn active" data-filter="all">ALL</button>
+<button type="button" class="filter-btn" data-filter="bkk">THBKK</button>
+<button type="button" class="filter-btn" data-filter="lch">THLCH</button>
+</div></div>
+{secs}
+<div class="ov-leg"><span class="sur">Surplus</span><span class="nor">Normal</span>
+<span class="tig">Tight</span><span class="sho">Shortage</span></div>
+<p class="ov-note">SINOKOR: จากไฟล์ Daily Container Stock (ชีต New Format; booking {wk['l1']} และ {wk['l2']}) ·
+HEUNG A: จากรายงานนี้ · Balance = ตู้ในสต็อก + ตู้ขาเข้า/E/P &minus; Booking 2 สัปดาห์ ·
+Shortage = คงเหลือ ≤ 0 · Tight &lt; 1 เท่าของ booking · Normal 1&ndash;3 เท่า · Surplus &gt; 3 เท่า</p>
+</div>
+<script>{DASH_JS}</script>
+</body></html>"""
+    with open(path, "w", encoding="utf-8") as fh:
+        fh.write(html)
+
+
 def _ov_zone(zone, cs, fi, bk1, bk2, repo_side, bal_side, wk1_lbl, wk2_lbl):
     cfg = XL_ZONES[zone]
     groups, code = cfg["groups"], cfg["code"]
@@ -970,26 +1103,7 @@ def _ov_zone(zone, cs, fi, bk1, bk2, repo_side, bal_side, wk1_lbl, wk2_lbl):
     fin, b1, b2 = _xl_sum(fi, groups), _xl_sum(bk1, groups), _xl_sum(bk2, groups)
     bal = {t: int(bal_side[t]) for t in TEMPLATE_TYPES}
 
-    def plain(vals, cls=""):
-        out = ""
-        for t in TEMPLATE_TYPES:
-            v = int(vals[t])
-            out += f"<td class='z'>–</td>" if v == 0 else f"<td>{v:,}</td>"
-        return f"<tr class='{cls}'>" + "{label}" + out + "</tr>"
-
-    def row(label, vals, cls=""):
-        return plain(vals, cls).replace("{label}", f"<td>{label}</td>")
-
-    pills = "".join(
-        f"<td><span class='pill {_bal_class(bal[t], b1[t] + b2[t])}'>{bal[t]:,}</span></td>"
-        for t in TEMPLATE_TYPES)
-    head = "".join(f"<th>{t}</th>" for t in TEMPLATE_TYPES)
-    table = (f"<table class='ct'><thead><tr><th>TYPE</th>{head}</tr></thead><tbody>"
-             + row("Current stock", stock, "cur")
-             + row("MT return (inbound)", fin)
-             + row("Booking, this wk", b1)
-             + row("Booking, next wk", b2)
-             + f"<tr class='bal'><td>Balance</td>{pills}</tr></tbody></table>")
+    table = _ct_table(stock, fin, b1, b2, bal)
 
     grows = ""
     for g in groups:
@@ -1218,6 +1332,8 @@ def main(argv=None):
                     help="booking/pickup file - repeat if the export is split "
                          "(e.g. --bkg backlog.xlsx --bkg forward.xls)")
     ap.add_argument("--ep2", help="optional P.O.D file for the REPO (E/P) row (row 14)")
+    ap.add_argument("--sinokor", help="optional SINOKOR 'Daily Container Stock' xlsx -> compare.html "
+                                      "(SINOKOR vs HEUNG A overview page)")
     ap.add_argument("--date", dest="date_opt")
     ap.add_argument("--out")
     ap.add_argument("--dashboard-dir", default=os.path.join(HERE, "dashboard-public"),
@@ -1247,7 +1363,7 @@ def main(argv=None):
     print("  BKG+PD :", ", ".join(os.path.basename(p) for p in bkg))
     print("  STAYING:", os.path.basename(staying))
     print("  EP2    :", os.path.basename(ep2) if ep2 else "(none - REPO (E/P) row left blank)")
-    build(actual, bkg, staying, report_date, out, ep2_path=ep2)
+    build(actual, bkg, staying, report_date, out, ep2_path=ep2, sinokor_path=a.sinokor)
 
     if a.publish:
         publish_dashboard(os.path.join(HERE, "index.html"), a.dashboard_dir, report_date)
@@ -1263,8 +1379,11 @@ def publish_dashboard(src_html, dash_dir, report_date):
     ov = os.path.join(os.path.dirname(src_html), "overview.html")
     if os.path.exists(ov):
         pages.append("overview.html")
+    cmp_page = os.path.join(os.path.dirname(src_html), "compare.html")
+    if os.path.exists(cmp_page):
+        pages.append("compare.html")
     for name in pages:
-        shutil.copyfile(src_html if name == "index.html" else ov, os.path.join(dash_dir, name))
+        shutil.copyfile(os.path.join(os.path.dirname(src_html), name), os.path.join(dash_dir, name))
     subprocess.run(["git", "-C", dash_dir, "add"] + pages, check=True)
     r = subprocess.run(["git", "-C", dash_dir, "commit", "-m",
                         f"dashboard {report_date:%Y-%m-%d}"], capture_output=True, text=True)
