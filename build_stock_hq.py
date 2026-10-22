@@ -590,11 +590,14 @@ DASH_CSS = """
 body{margin:0;color:var(--ink);background:#e9eef5;font:14px/1.5 "Segoe UI","Leelawadee UI","Noto Sans Thai",Roboto,sans-serif}
 .accent-bar{height:5px;background:linear-gradient(90deg,var(--bkk),var(--lch))}
 .wrap{max-width:1800px;margin:0 auto;padding:18px 18px 48px}
-.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;
-background:linear-gradient(rgba(255,255,255,.88),rgba(255,255,255,.88)),url('header.jpg') center/cover;
-border:1px solid var(--line);border-radius:16px;padding:18px 26px;margin:0 0 12px;box-shadow:0 5px 16px rgba(15,35,60,.08)}
-.topbar img{height:46px;width:auto;object-fit:contain}
+.topbar{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;min-height:132px;
+background:linear-gradient(180deg,rgba(15,30,45,0) 30%,rgba(15,30,45,.62) 100%),#32414f url('header.jpg') center 38%/cover;
+border-radius:16px;padding:18px 26px;margin:0 0 12px;box-shadow:0 6px 18px rgba(15,35,60,.18)}
+.topbar img{height:42px;width:auto;object-fit:contain;background:#fff;border-radius:10px;padding:6px 12px;
+box-shadow:0 3px 10px rgba(15,35,60,.25);align-self:flex-start}
 h1{font-size:24px;margin:0 0 2px;color:var(--navy);font-weight:800}
+.topbar h1{color:#fff;font-size:30px;text-shadow:0 1px 6px rgba(0,0,0,.35)}
+.topbar .sub{color:rgba(255,255,255,.92)}
 .sub{color:var(--mut);margin:0;font-size:14px}
 .toolbar{display:flex;gap:6px;margin:0 0 12px}
 .filter-btn{cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--mut);
@@ -665,7 +668,7 @@ white-space:nowrap;overflow:hidden;background:#fff}
 .rf tr.tot td{border-top:3px double #000;font-weight:700;background:#d9d9d9}
 .rf-title{font-weight:700;color:#1f4e79;margin:16px 0 0;font-size:15px}
 footer{margin-top:26px;color:var(--mut);font-size:12px;text-align:center}
-@media(max-width:600px){.topbar{flex-direction:column;align-items:flex-start;padding:14px 16px}
+@media(max-width:600px){.topbar{flex-direction:column-reverse;align-items:flex-start;padding:14px 16px}
 .topbar img{height:34px}h1{font-size:20px}.wrap{padding:12px 10px 36px}}
 """
 
