@@ -590,11 +590,12 @@ DASH_CSS = """
 body{margin:0;color:var(--ink);background:#e9eef5;font:14px/1.5 "Segoe UI","Leelawadee UI","Noto Sans Thai",Roboto,sans-serif}
 .accent-bar{height:5px;background:linear-gradient(90deg,var(--bkk),var(--lch))}
 .wrap{max-width:1800px;margin:0 auto;padding:18px 18px 48px}
-.topbar{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;min-height:132px;
+.topbar{position:relative;display:flex;justify-content:space-between;align-items:flex-end;gap:16px;min-height:160px;
 background:linear-gradient(180deg,rgba(15,30,45,0) 30%,rgba(15,30,45,.62) 100%),#32414f url('header.jpg') center 38%/cover;
 border-radius:16px;padding:18px 26px;margin:0 0 12px;box-shadow:0 6px 18px rgba(15,35,60,.18)}
-.topbar img{height:42px;width:auto;object-fit:contain;background:#fff;border-radius:10px;padding:6px 12px;
-box-shadow:0 3px 10px rgba(15,35,60,.25);align-self:flex-start}
+.tb-logo{position:absolute;top:14px;left:26px;background:#fff;border-radius:12px;padding:6px 12px;
+box-shadow:0 3px 10px rgba(15,35,60,.25);line-height:0}
+.tb-logo img{height:40px;width:auto;display:block}
 h1{font-size:24px;margin:0 0 2px;color:var(--navy);font-weight:800}
 .topbar h1{color:#fff;font-size:30px;text-shadow:0 1px 6px rgba(0,0,0,.35)}
 .topbar .sub{color:rgba(255,255,255,.92)}
@@ -668,8 +669,8 @@ white-space:nowrap;overflow:hidden;background:#fff}
 .rf tr.tot td{border-top:3px double #000;font-weight:700;background:#d9d9d9}
 .rf-title{font-weight:700;color:#1f4e79;margin:16px 0 0;font-size:15px}
 footer{margin-top:26px;color:var(--mut);font-size:12px;text-align:center}
-@media(max-width:600px){.topbar{flex-direction:column-reverse;align-items:flex-start;padding:14px 16px}
-.topbar img{height:34px}h1{font-size:20px}.wrap{padding:12px 10px 36px}}
+@media(max-width:600px){.topbar{padding:14px 16px;min-height:150px}.tb-logo{left:16px}
+.tb-logo img{height:30px}h1{font-size:20px}.wrap{padding:12px 10px 36px}}
 """
 
 DASH_JS = """
@@ -1192,9 +1193,9 @@ def write_dashboard(path, report_date, wk1_lbl, wk2_lbl,
 <div class="accent-bar"></div>
 <div class="wrap">
 <header class="topbar">
+<div class="tb-logo"><img src="logo.png" alt="HEUNG A LINE"></div>
 <div><h1>Stock Report HQ</h1>
 <p class="sub">รายงานประจำวันที่ {report_date:%d/%m/%Y} (วัน{weekday})</p></div>
-<img src="logo.png" alt="logo">
 </header>
 {_nav("index")}
 <div class="toolbar">
