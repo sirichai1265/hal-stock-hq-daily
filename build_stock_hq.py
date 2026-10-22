@@ -605,6 +605,11 @@ padding:9px 18px;border-radius:999px;transition:all .15s}
 .filter-btn[data-filter="all"].active{background:var(--navy)}
 .filter-btn[data-filter="bkk"].active{background:var(--bkk)}
 .filter-btn[data-filter="lch"].active{background:var(--lch)}
+.nav{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px}
+.nav a{text-decoration:none;font-family:inherit;font-weight:700;font-size:12.5px;line-height:1;letter-spacing:.03em;
+padding:9px 18px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--mut);transition:all .15s}
+.nav a:hover{border-color:var(--bkk);color:var(--navy)}
+.nav a.on{background:var(--navy);border-color:transparent;color:#fff}
 .hide{display:none!important}
 .xl-wrap{overflow-x:auto;background:#fff;border:1px solid #cbd5e1;border-radius:10px;padding:10px}
 .xl{width:max-content;font-family:Arial,"Segoe UI","Noto Sans Thai",sans-serif;font-size:13px;color:#000}
@@ -891,11 +896,7 @@ background:#32414f url('header.jpg') center 38%/cover;box-shadow:0 8px 22px rgba
 .ov-banner .bs{font-size:13px;letter-spacing:.06em;opacity:.9;margin-top:2px}
 .ov-banner .bd{position:absolute;z-index:1;right:20px;bottom:14px;color:#fff;font:700 22px ui-monospace,Consolas,Menlo,monospace}
 .ov-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:14px 0 4px}
-.nav{display:flex;gap:8px;margin:0 12px 0 0}
-.nav a{text-decoration:none;font-weight:700;font-size:13px;padding:8px 16px;border-radius:999px;
-border:1px solid var(--line);background:#fff;color:var(--mut)}
-.nav a:hover{border-color:var(--bkk);color:var(--navy)}
-.nav a.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.ov-bar .nav{margin:0 12px 0 0}
 .ov-bar .toolbar{margin:0}
 .zone-h{display:flex;align-items:baseline;gap:10px;margin:26px 0 12px}
 .zone-h h2{margin:0;font-size:36px;line-height:1.1;color:#1f6aa5;font-weight:800}
