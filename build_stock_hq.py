@@ -895,6 +895,9 @@ background:#32414f url('header.jpg') center 38%/cover;box-shadow:0 8px 22px rgba
 .ov-banner h1{margin:0;color:#fff;font-size:36px;line-height:1.15;font-weight:800;letter-spacing:.2px}
 .ov-banner .bs{font-size:13px;letter-spacing:.06em;opacity:.9;margin-top:2px}
 .ov-banner .bd{position:absolute;z-index:1;right:20px;bottom:14px;color:#fff;font:700 22px ui-monospace,Consolas,Menlo,monospace}
+.ov-logo{position:absolute;z-index:1;top:14px;left:20px;background:#fff;border-radius:12px;padding:6px 12px;
+box-shadow:0 3px 10px rgba(15,35,60,.25);line-height:0}
+.ov-logo img{height:40px;width:auto;display:block}
 .ov-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:14px 0 4px}
 .ov-bar .nav{margin:0 12px 0 0}
 .ov-bar .toolbar{margin:0}
@@ -950,7 +953,7 @@ background:#e2e8f0;color:#475569;vertical-align:1px}
 .ov-leg span:before{content:"";display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;vertical-align:-1px;background:var(--c)}
 .ov-leg .sur{--c:#1d5fa8}.ov-leg .nor{--c:#15803d}.ov-leg .tig{--c:#946400}.ov-leg .sho{--c:#b42318}
 .ov-note{margin:8px 0 0;color:#8a97a6;font-size:12px}
-@media(max-width:600px){.ov-banner h1{font-size:26px}.zone-h h2{font-size:28px}.ov-banner .bd{font-size:16px}}
+@media(max-width:600px){.ov-logo img{height:30px}.ov-banner h1{font-size:26px}.zone-h h2{font-size:28px}.ov-banner .bd{font-size:16px}}
 """
 
 _MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
@@ -1075,7 +1078,7 @@ def write_compare(path, report_date, skr, fi, cs, bk1, bk2, bal, repo):
 <title>Stock Report HQ &ndash; SINOKOR vs HEUNG A {report_date:%Y-%m-%d}</title>
 <style>{DASH_CSS}{OV_CSS}</style></head><body>
 <div class="ov">
-<header class="ov-banner"><div class="bt"><h1>Container Stock Condition</h1>
+<header class="ov-banner"><div class="ov-logo"><img src="logo.png" alt="HEUNG A LINE"></div><div class="bt"><h1>Container Stock Condition</h1>
 <div class="bs">SINOKOR vs HEUNG A</div></div><div class="bd">{date_txt}</div></header>
 <div class="ov-bar">{_nav("compare")}
 <div class="toolbar">
@@ -1142,7 +1145,7 @@ def write_overview(path, report_date, wk1_lbl, wk2_lbl, fi, cs, bk1, bk2, bal, r
 <title>Stock Report HQ &ndash; ภาพรวม {report_date:%Y-%m-%d}</title>
 <style>{DASH_CSS}{OV_CSS}</style></head><body>
 <div class="ov">
-<header class="ov-banner"><div class="bt"><h1>Container Stock Condition</h1>
+<header class="ov-banner"><div class="ov-logo"><img src="logo.png" alt="HEUNG A LINE"></div><div class="bt"><h1>Container Stock Condition</h1>
 <div class="bs">HEUNG A LINE (THAILAND)</div></div><div class="bd">{date_txt}</div></header>
 <div class="ov-bar">{_nav("overview")}
 <div class="toolbar">
