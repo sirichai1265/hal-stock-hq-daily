@@ -80,96 +80,89 @@ footer{margin-top:26px;color:var(--mut);font-size:12px;text-align:center}
 @media(max-width:600px){.topbar{flex-direction:column;align-items:flex-start;padding:14px 16px}
 .topbar img{height:34px}h1{font-size:20px}.wrap{padding:12px 10px 36px}}
 
-.nav{display:flex;gap:8px;margin:0 0 12px}
-.nav a{text-decoration:none;font-weight:700;font-size:13px;padding:9px 18px;border-radius:999px;
+body{background:#eaf0f7}
+.ov{max-width:1240px;margin:0 auto;padding:22px 20px 48px}
+.ov-banner{position:relative;height:158px;border-radius:18px;overflow:hidden;
+background:#32414f url('header.jpg') center 38%/cover;box-shadow:0 8px 22px rgba(15,35,60,.18)}
+.ov-banner:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,30,45,0) 25%,rgba(15,30,45,.62) 100%)}
+.ov-banner .bt{position:absolute;z-index:1;left:20px;bottom:14px;color:#fff}
+.ov-banner h1{margin:0;color:#fff;font-size:36px;line-height:1.15;font-weight:800;letter-spacing:.2px}
+.ov-banner .bs{font-size:13px;letter-spacing:.06em;opacity:.9;margin-top:2px}
+.ov-banner .bd{position:absolute;z-index:1;right:20px;bottom:14px;color:#fff;font:700 22px ui-monospace,Consolas,Menlo,monospace}
+.ov-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:14px 0 4px}
+.nav{display:flex;gap:8px;margin:0 12px 0 0}
+.nav a{text-decoration:none;font-weight:700;font-size:13px;padding:8px 16px;border-radius:999px;
 border:1px solid var(--line);background:#fff;color:var(--mut)}
 .nav a:hover{border-color:var(--bkk);color:var(--navy)}
 .nav a.on{background:var(--navy);border-color:var(--navy);color:#fff}
-.ov-zone{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px 22px;margin:0 0 16px;
-box-shadow:0 5px 16px rgba(15,35,60,.06);border-top:5px solid var(--zc)}
-.ov-zone[data-zone=bkk]{--zc:var(--bkk)}.ov-zone[data-zone=lch]{--zc:var(--lch)}
-.ov-h{display:flex;align-items:baseline;gap:12px;margin:0 0 14px}
-.ov-h h2{margin:0;font-size:22px;color:var(--zc);font-weight:800}
-.ov-h span{color:var(--mut);font-size:13px}
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:0 0 20px}
-.kpi{border:1px solid var(--line);border-radius:12px;padding:12px 16px;background:#f8fafc}
-.kpi small{display:block;color:var(--mut);font-size:12px;font-weight:600}
-.kpi b{display:block;font-size:30px;line-height:1.15;color:var(--navy);font-weight:800;margin-top:2px}
-.kpi em{font-style:normal;color:var(--mut);font-size:11.5px}
-.kpi.good b{color:#15803d}.kpi.bad b{color:#c81e1e}
-.ov-cols{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:22px}
-@media(max-width:1250px){.ov-cols{grid-template-columns:1fr}}
-.ov-cols>div{min-width:0;overflow-x:auto}
-.gt th,.gt td{padding-left:6px;padding-right:6px}
-.ov-cols h3{margin:0 0 4px;font-size:15px;color:var(--navy)}
-.ov-cols p.hint{margin:0 0 12px;color:var(--mut);font-size:12.5px}
-.legend{display:flex;flex-wrap:wrap;gap:14px;margin:0 0 12px;font-size:12.5px;color:var(--mut)}
-.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
-.c-s{background:#3b82f6}.c-b{background:#f59e0b}.c-p{background:#16a34a}.c-n{background:#dc2626}
-.trow{display:grid;grid-template-columns:92px 1fr;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}
-.trow.first{border-top:0}
-.tn b{display:block;font-size:15px;color:var(--navy)}.tn small{color:var(--mut);font-size:11.5px}
-.bar{position:relative;height:17px;margin:2px 0;border-radius:5px;background:#f1f5f9}
-.bar i{position:absolute;left:0;top:0;bottom:0;border-radius:5px;min-width:3px}
-.bar span{position:absolute;left:8px;top:0;font-size:11.5px;line-height:17px;font-weight:700;color:#0f172a;
-text-shadow:0 0 3px #fff,0 0 3px #fff}
-.bar.neg span{color:#991b1b}
-table.gt{width:100%;border-collapse:collapse;font-size:13.5px}
-.gt th{white-space:nowrap;text-align:right;color:var(--mut);font-size:12px;font-weight:600;padding:6px 8px;border-bottom:2px solid var(--line)}
+.ov-bar .toolbar{margin:0}
+.zone-h{display:flex;align-items:baseline;gap:10px;margin:26px 0 12px}
+.zone-h h2{margin:0;font-size:36px;line-height:1.1;color:#1f6aa5;font-weight:800}
+.zone-h small{color:#8a97a6;font-size:13px;letter-spacing:.04em}
+.zone-h:after{content:"";flex:1;border-top:1px solid #cfd8e3;transform:translateY(-6px)}
+.ccard{background:#fff;border-radius:16px;border-left:5px solid #1e5bc6;box-shadow:0 6px 18px rgba(15,35,60,.09);
+padding:16px 20px 12px;overflow-x:auto}
+.cc-h{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px}
+.cc-n{display:flex;align-items:center;gap:10px}
+.cc-n i{width:11px;height:11px;border-radius:50%;background:#1e5bc6;display:inline-block}
+.cc-n b{display:block;color:#1e5bc6;font-size:17px;font-weight:800;letter-spacing:.02em;line-height:1.1}
+.cc-n small{display:block;color:#8a97a6;font-size:12.5px}
+.cc-u{text-align:right}
+.cc-u b{display:block;font:700 26px ui-monospace,Consolas,Menlo,monospace;color:#16222f;line-height:1.1}
+.cc-u small{color:#8a97a6;font-size:11px;letter-spacing:.08em}
+table.ct{width:100%;border-collapse:collapse;min-width:640px;font-family:ui-monospace,Consolas,Menlo,monospace;font-size:14px}
+.ct th{background:#f2f6fa;color:#8a97a6;font:600 11.5px "Segoe UI",sans-serif;padding:7px 8px;text-align:right}
+.ct th:first-child,.ct td:first-child{text-align:left}
+.ct td{padding:8px 8px;text-align:right;border-bottom:1px solid #e8eef4;color:#2b3a4a}
+.ct td:first-child{font:600 13px "Segoe UI","Leelawadee UI",sans-serif;color:#44566a;white-space:nowrap}
+.ct tr.cur td{font-weight:800;font-size:15.5px;color:#0f1b27;padding:11px 8px}
+.ct tr.cur td:first-child{font-size:15px;color:#0f1b27}
+.ct td.z{color:#aab6c3}
+.ct tr.bal td{border-bottom:0;padding-top:12px}
+.ct tr.bal td:first-child{font-weight:800;color:#0f1b27}
+.pill{display:inline-block;min-width:44px;text-align:center;padding:3px 9px;border-radius:9px;font-weight:700;font-size:13.5px}
+.p-sur{background:#dbeafe;color:#1d5fa8}.p-nor{background:#dcf3dc;color:#15803d}
+.p-tig{background:#fdf1c9;color:#946400}.p-sho{background:#fbd9d9;color:#b42318}
+.ov-det{margin:10px 0 0}
+.ov-det summary{cursor:pointer;color:#1f6aa5;font-size:13px;font-weight:700;padding:4px 0}
+table.gt{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:8px}
+.gt th{white-space:nowrap;text-align:right;color:var(--mut);font-size:12px;font-weight:600;padding:6px;border-bottom:2px solid var(--line)}
 .gt th:first-child,.gt td:first-child{text-align:left}
-.gt td{padding:8px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.gt td{padding:7px 6px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 .gt td.gname b{color:var(--navy)}
 .badge{display:inline-block;margin-left:6px;font-size:10px;font-weight:700;padding:1px 7px;border-radius:999px;
 background:#e2e8f0;color:#475569;vertical-align:1px}
 .badge.dep{background:#dbeafe;color:#1d4ed8}
-.gt .sb{display:inline-block;width:46px;height:9px;background:#f1f5f9;border-radius:5px;margin-right:8px;
-vertical-align:middle;position:relative}
-.gt .sb i{position:absolute;left:0;top:0;bottom:0;border-radius:5px;background:#3b82f6}
 .gt td.dash{color:#cbd5e1}
 .gt tr.tot td{border-top:2px solid var(--navy);font-weight:800;color:var(--navy);border-bottom:0}
+.ov-leg{display:flex;flex-wrap:wrap;gap:18px;margin:26px 0 0;padding-top:14px;border-top:1px solid #cfd8e3;color:#5b6b7c;font-size:12.5px}
+.ov-leg span:before{content:"";display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;vertical-align:-1px;background:var(--c)}
+.ov-leg .sur{--c:#1d5fa8}.ov-leg .nor{--c:#15803d}.ov-leg .tig{--c:#946400}.ov-leg .sho{--c:#b42318}
+.ov-note{margin:8px 0 0;color:#8a97a6;font-size:12px}
+@media(max-width:600px){.ov-banner h1{font-size:26px}.zone-h h2{font-size:28px}.ov-banner .bd{font-size:16px}}
 </style></head><body>
-<div class="accent-bar"></div>
-<div class="wrap">
-<header class="topbar">
-<div><h1>Stock Report HQ</h1>
-<p class="sub">ภาพรวมประจำวันที่ 22/10/2026 (วันพฤหัสบดี)</p></div>
-<img src="logo.png" alt="logo">
-</header>
-<nav class='nav'><a href='index.html'>📋 ตารางรายงาน</a><a href='overview.html' class='on'>📊 ภาพรวม</a></nav>
+<div class="ov">
+<header class="ov-banner"><div class="bt"><h1>Container Stock Condition</h1>
+<div class="bs">HEUNG A LINE (THAILAND)</div></div><div class="bd">22 Oct 2026</div></header>
+<div class="ov-bar"><nav class='nav'><a href='index.html'>📋 ตารางรายงาน</a><a href='overview.html' class='on'>📊 ภาพรวม</a></nav>
 <div class="toolbar">
 <button type="button" class="filter-btn active" data-filter="all">ALL</button>
 <button type="button" class="filter-btn" data-filter="bkk">THBKK</button>
 <button type="button" class="filter-btn" data-filter="lch">THLCH</button>
-</div>
-<section class="ov-zone" data-zone="bkk">
-<div class="ov-h"><h2>THBKK</h2><span>ภาพรวมตู้ว่าง เทียบกับ booking</span></div>
-<div class="kpis"><div class='kpi'><small>ตู้ว่างในสต็อกตอนนี้</small><b>2,955</b><em>ตู้ (รวม REPO E/P)</em></div><div class='kpi'><small>ตู้ FULL ขาเข้า (รอคืนตู้ว่าง)</small><b>271</b><em>ตู้</em></div><div class='kpi'><small>Booking 22-25/10/2026</small><b>168</b><em>สัปดาห์นี้</em></div><div class='kpi'><small>Booking 26/10-01/11/2026</small><b>511</b><em>สัปดาห์หน้า</em></div><div class='kpi good'><small>คงเหลือหลังหัก booking</small><b>2,547</b><em>ตู้ (ผลรวมทุกชนิด)</em></div></div>
-<div class="ov-cols">
-<div><h3>สต็อก vs Booking แยกตามชนิดตู้</h3>
-<p class="hint">ดูง่ายๆ: แท่งสีเขียวคือตู้ที่เหลือหลังหัก booking ถ้าเป็นสีแดงคือตู้ไม่พอ</p>
-<div class="legend"><span><i class="c-s"></i>ตู้ว่างในสต็อก</span>
-<span><i class="c-b"></i>Booking 2 สัปดาห์</span><span><i class="c-p"></i>คงเหลือ</span>
-<span><i class="c-n"></i>ขาด</span></div><div class='trow first'><div class='tn'><b>22GP</b><small>Dry 20'</small></div><div><div class='bar'><i class='c-s' style='width:100.0%'></i><span>1578</span></div><div class='bar'><i class='c-b' style='width:26.6%'></i><span>419</span></div><div class='bar'><i class='c-p' style='width:80.1%'></i><span>1264</span></div></div></div><div class='trow'><div class='tn'><b>42GP</b><small>Dry 40'</small></div><div><div class='bar'><i class='c-s' style='width:0.3%'></i><span>4</span></div><div class='bar'><i class='c-b' style='width:0.0%'></i><span>0</span></div><div class='bar'><i class='c-p' style='width:0.3%'></i><span>4</span></div></div></div><div class='trow'><div class='tn'><b>45GP</b><small>Dry 40' HC</small></div><div><div class='bar'><i class='c-s' style='width:83.5%'></i><span>1317</span></div><div class='bar'><i class='c-b' style='width:13.7%'></i><span>216</span></div><div class='bar'><i class='c-p' style='width:79.7%'></i><span>1258</span></div></div></div><div class='trow'><div class='tn'><b>22RE</b><small>Reefer 20'</small></div><div><div class='bar'><i class='c-s' style='width:2.5%'></i><span>40</span></div><div class='bar'><i class='c-b' style='width:0.3%'></i><span>4</span></div><div class='bar'><i class='c-p' style='width:2.4%'></i><span>38</span></div></div></div><div class='trow'><div class='tn'><b>45RE</b><small>Reefer 40' HC</small></div><div><div class='bar'><i class='c-s' style='width:1.0%'></i><span>16</span></div><div class='bar'><i class='c-b' style='width:2.5%'></i><span>40</span></div><div class='bar neg'><i class='c-n' style='width:1.1%'></i><span>-17</span></div></div></div></div>
-<div><h3>แยกตามสถานที่</h3>
-<p class="hint">จำนวนตู้รวมทุกชนิดต่อสถานที่ ( – = ไม่มีข้อมูลในส่วนนั้น)</p>
-<table class="gt"><thead><tr><th>สถานที่</th><th>ตู้ว่างในสต็อก</th><th>FULL ขาเข้า</th>
-<th title='22-25/10/2026'>Booking WK1ST</th><th title='26/10-01/11/2026'>Booking WK2ND</th></tr></thead><tbody><tr><td class='gname'><b>PAT</b><span class='badge'>TERMINAL</span></td><td><span class='sb'><i style='width:4%'></i></span>58</td><td>187</td><td>37</td><td>32</td></tr><tr><td class='gname'><b>UNITHAI</b><span class='badge'>TERMINAL</span></td><td><span class='sb'><i style='width:3%'></i></span>40</td><td>74</td><td>0</td><td>2</td></tr><tr><td class='gname'><b>ESCO #2</b><span class='badge'>ICD</span></td><td><span class='sb'><i style='width:0%'></i></span>0</td><td>8</td><td>0</td><td>0</td></tr><tr><td class='gname'><b>TIFFA</b><span class='badge'>ICD</span></td><td><span class='sb'><i style='width:1%'></i></span>21</td><td>2</td><td>0</td><td>0</td></tr><tr><td class='gname'><b>SMART</b><span class='badge dep'>DEPOT</span></td><td><span class='sb'><i style='width:100%'></i></span>1,511</td><td class='dash'>–</td><td>37</td><td>48</td></tr><tr><td class='gname'><b>BC2</b><span class='badge dep'>DEPOT</span></td><td><span class='sb'><i style='width:88%'></i></span>1,325</td><td class='dash'>–</td><td>94</td><td>429</td></tr><tr><td class='gname'><b>BMTP</b><span class='badge'>ICD</span></td><td><span class='sb'><i style='width:0%'></i></span>0</td><td>0</td><td class='dash'>–</td><td class='dash'>–</td></tr><tr><td class='gname'><b>SCT</b><span class='badge'>ICD</span></td><td><span class='sb'><i style='width:0%'></i></span>0</td><td>0</td><td class='dash'>–</td><td class='dash'>–</td></tr><tr class='tot'><td>รวม BKK</td><td>2,955</td><td>271</td><td>168</td><td>511</td></tr></tbody></table></div>
-</div></section><section class="ov-zone" data-zone="lch">
-<div class="ov-h"><h2>THLCH</h2><span>ภาพรวมตู้ว่าง เทียบกับ booking</span></div>
-<div class="kpis"><div class='kpi'><small>ตู้ว่างในสต็อกตอนนี้</small><b>3,525</b><em>ตู้ (รวม REPO E/P)</em></div><div class='kpi'><small>ตู้ FULL ขาเข้า (รอคืนตู้ว่าง)</small><b>260</b><em>ตู้</em></div><div class='kpi'><small>Booking 22-25/10/2026</small><b>221</b><em>สัปดาห์นี้</em></div><div class='kpi'><small>Booking 26/10-01/11/2026</small><b>351</b><em>สัปดาห์หน้า</em></div><div class='kpi good'><small>คงเหลือหลังหัก booking</small><b>3,571</b><em>ตู้ (ผลรวมทุกชนิด)</em></div></div>
-<div class="ov-cols">
-<div><h3>สต็อก vs Booking แยกตามชนิดตู้</h3>
-<p class="hint">ดูง่ายๆ: แท่งสีเขียวคือตู้ที่เหลือหลังหัก booking ถ้าเป็นสีแดงคือตู้ไม่พอ</p>
-<div class="legend"><span><i class="c-s"></i>ตู้ว่างในสต็อก</span>
-<span><i class="c-b"></i>Booking 2 สัปดาห์</span><span><i class="c-p"></i>คงเหลือ</span>
-<span><i class="c-n"></i>ขาด</span></div><div class='trow first'><div class='tn'><b>22GP</b><small>Dry 20'</small></div><div><div class='bar'><i class='c-s' style='width:94.6%'></i><span>2159</span></div><div class='bar'><i class='c-b' style='width:14.6%'></i><span>334</span></div><div class='bar'><i class='c-p' style='width:100.0%'></i><span>2282</span></div></div></div><div class='trow'><div class='tn'><b>42GP</b><small>Dry 40'</small></div><div><div class='bar'><i class='c-s' style='width:0.0%'></i><span>1</span></div><div class='bar'><i class='c-b' style='width:0.0%'></i><span>0</span></div><div class='bar'><i class='c-p' style='width:0.0%'></i><span>1</span></div></div></div><div class='trow'><div class='tn'><b>45GP</b><small>Dry 40' HC</small></div><div><div class='bar'><i class='c-s' style='width:56.8%'></i><span>1297</span></div><div class='bar'><i class='c-b' style='width:9.0%'></i><span>205</span></div><div class='bar'><i class='c-p' style='width:53.9%'></i><span>1230</span></div></div></div><div class='trow'><div class='tn'><b>22RE</b><small>Reefer 20'</small></div><div><div class='bar'><i class='c-s' style='width:0.5%'></i><span>11</span></div><div class='bar'><i class='c-b' style='width:0.0%'></i><span>0</span></div><div class='bar'><i class='c-p' style='width:0.5%'></i><span>12</span></div></div></div><div class='trow'><div class='tn'><b>45RE</b><small>Reefer 40' HC</small></div><div><div class='bar'><i class='c-s' style='width:2.2%'></i><span>51</span></div><div class='bar'><i class='c-b' style='width:1.4%'></i><span>33</span></div><div class='bar'><i class='c-p' style='width:1.8%'></i><span>40</span></div></div></div><div class='trow'><div class='tn'><b>22UT</b><small>Open top 20'</small></div><div><div class='bar'><i class='c-s' style='width:0.0%'></i><span>1</span></div><div class='bar'><i class='c-b' style='width:0.0%'></i><span>0</span></div><div class='bar'><i class='c-p' style='width:0.0%'></i><span>1</span></div></div></div><div class='trow'><div class='tn'><b>42UT</b><small>Open top 40'</small></div><div><div class='bar'><i class='c-s' style='width:0.1%'></i><span>2</span></div><div class='bar'><i class='c-b' style='width:0.0%'></i><span>0</span></div><div class='bar'><i class='c-p' style='width:0.1%'></i><span>2</span></div></div></div><div class='trow'><div class='tn'><b>22PC</b><small>Platform 20'</small></div><div><div class='bar'><i class='c-s' style='width:0.1%'></i><span>2</span></div><div class='bar'><i class='c-b' style='width:0.0%'></i><span>0</span></div><div class='bar'><i class='c-p' style='width:0.1%'></i><span>2</span></div></div></div><div class='trow'><div class='tn'><b>42PC</b><small>Platform 40'</small></div><div><div class='bar'><i class='c-s' style='width:0.0%'></i><span>1</span></div><div class='bar'><i class='c-b' style='width:0.0%'></i><span>0</span></div><div class='bar'><i class='c-p' style='width:0.0%'></i><span>1</span></div></div></div></div>
-<div><h3>แยกตามสถานที่</h3>
-<p class="hint">จำนวนตู้รวมทุกชนิดต่อสถานที่ ( – = ไม่มีข้อมูลในส่วนนั้น)</p>
-<table class="gt"><thead><tr><th>สถานที่</th><th>ตู้ว่างในสต็อก</th><th>FULL ขาเข้า</th>
-<th title='22-25/10/2026'>Booking WK1ST</th><th title='26/10-01/11/2026'>Booking WK2ND</th></tr></thead><tbody><tr><td class='gname'><b>LCMT</b><span class='badge'>TERMINAL</span></td><td><span class='sb'><i style='width:0%'></i></span>6</td><td>137</td><td class='dash'>–</td><td class='dash'>–</td></tr><tr><td class='gname'><b>ESCO</b><span class='badge'>TERMINAL</span></td><td><span class='sb'><i style='width:0%'></i></span>1</td><td>58</td><td class='dash'>–</td><td class='dash'>–</td></tr><tr><td class='gname'><b>LCIT</b><span class='badge'>TERMINAL</span></td><td><span class='sb'><i style='width:0%'></i></span>2</td><td>9</td><td class='dash'>–</td><td class='dash'>–</td></tr><tr><td class='gname'><b>HPT</b><span class='badge'>TERMINAL</span></td><td><span class='sb'><i style='width:0%'></i></span>0</td><td>56</td><td class='dash'>–</td><td class='dash'>–</td></tr><tr><td class='gname'><b>HAST</b><span class='badge dep'>DEPOT</span></td><td><span class='sb'><i style='width:85%'></i></span>1,381</td><td class='dash'>–</td><td>26</td><td>69</td></tr><tr><td class='gname'><b>CELLO</b><span class='badge dep'>DEPOT</span></td><td><span class='sb'><i style='width:9%'></i></span>153</td><td class='dash'>–</td><td>4</td><td>32</td></tr><tr><td class='gname'><b>PW</b><span class='badge dep'>DEPOT</span></td><td><span class='sb'><i style='width:100%'></i></span>1,624</td><td class='dash'>–</td><td>191</td><td>250</td></tr><tr class='tot'><td>รวม LCH</td><td>3,525</td><td>260</td><td>221</td><td>351</td></tr></tbody></table></div>
-</div></section>
-<footer>สร้างอัตโนมัติจาก build_stock_hq.py &middot; ตัวเลขเป็นยอดรวม (ไม่มีชื่อลูกค้า/เลขบุ๊คกิ้ง) &middot;
-คงเหลือ = ตู้ในสต็อก + FULL ขาเข้า &minus; Booking (ตามสูตรชีต NEW FORMAT)</footer>
+</div></div>
+<section data-zone="bkk">
+<div class="zone-h"><h2>Bangkok</h2><small>THBKK</small></div>
+<div class="ccard"><div class="cc-h"><div class="cc-n"><i></i><div><b>HEUNG A</b><small>Bangkok</small></div></div>
+<div class="cc-u"><b>2,955</b><small>UNITS ON HAND</small></div></div>
+<table class='ct'><thead><tr><th>TYPE</th><th>22GP</th><th>42GP</th><th>45GP</th><th>22RE</th><th>45RE</th><th>22UT</th><th>42UT</th><th>22PC</th><th>42PC</th></tr></thead><tbody><tr class='cur'><td>Current stock</td><td>1,578</td><td>4</td><td>1,317</td><td>40</td><td>16</td><td class='z'>–</td><td class='z'>–</td><td class='z'>–</td><td class='z'>–</td></tr><tr class=''><td>MT return (inbound)</td><td>105</td><td class='z'>–</td><td>157</td><td>2</td><td>7</td><td class='z'>–</td><td class='z'>–</td><td class='z'>–</td><td class='z'>–</td></tr><tr class=''><td>Booking, this wk</td><td>112</td><td class='z'>–</td><td>50</td><td>1</td><td>5</td><td class='z'>–</td><td class='z'>–</td><td class='z'>–</td><td class='z'>–</td></tr><tr class=''><td>Booking, next wk</td><td>307</td><td class='z'>–</td><td>166</td><td>3</td><td>35</td><td class='z'>–</td><td class='z'>–</td><td class='z'>–</td><td class='z'>–</td></tr><tr class='bal'><td>Balance</td><td><span class='pill p-sur'>1,264</span></td><td><span class='pill p-tig'>4</span></td><td><span class='pill p-sur'>1,258</span></td><td><span class='pill p-sur'>38</span></td><td><span class='pill p-sho'>-17</span></td><td><span class='pill p-sho'>0</span></td><td><span class='pill p-sho'>0</span></td><td><span class='pill p-sho'>0</span></td><td><span class='pill p-sho'>0</span></td></tr></tbody></table><details class='ov-det'><summary>ดูแยกตามสถานที่</summary><table class='gt'><thead><tr><th>สถานที่</th><th>ตู้ว่างในสต็อก</th><th>FULL ขาเข้า</th><th title='22-25/10/2026'>Booking WK1ST</th><th title='26/10-01/11/2026'>Booking WK2ND</th></tr></thead><tbody><tr><td class='gname'><b>PAT</b><span class='badge'>TERMINAL</span></td><td>58</td><td>187</td><td>37</td><td>32</td></tr><tr><td class='gname'><b>UNITHAI</b><span class='badge'>TERMINAL</span></td><td>40</td><td>74</td><td>0</td><td>2</td></tr><tr><td class='gname'><b>ESCO #2</b><span class='badge'>ICD</span></td><td>0</td><td>8</td><td>0</td><td>0</td></tr><tr><td class='gname'><b>TIFFA</b><span class='badge'>ICD</span></td><td>21</td><td>2</td><td>0</td><td>0</td></tr><tr><td class='gname'><b>SMART</b><span class='badge dep'>DEPOT</span></td><td>1,511</td><td class='dash'>–</td><td>37</td><td>48</td></tr><tr><td class='gname'><b>BC2</b><span class='badge dep'>DEPOT</span></td><td>1,325</td><td class='dash'>–</td><td>94</td><td>429</td></tr><tr><td class='gname'><b>BMTP</b><span class='badge'>ICD</span></td><td>0</td><td>0</td><td class='dash'>–</td><td class='dash'>–</td></tr><tr><td class='gname'><b>SCT</b><span class='badge'>ICD</span></td><td>0</td><td>0</td><td class='dash'>–</td><td class='dash'>–</td></tr><tr class='tot'><td>รวม BKK</td><td>2,955</td><td>271</td><td>168</td><td>511</td></tr></tbody></table></details></div></section><section data-zone="lch">
+<div class="zone-h"><h2>Laem Chabang</h2><small>THLCH</small></div>
+<div class="ccard"><div class="cc-h"><div class="cc-n"><i></i><div><b>HEUNG A</b><small>Laem Chabang</small></div></div>
+<div class="cc-u"><b>3,525</b><small>UNITS ON HAND</small></div></div>
+<table class='ct'><thead><tr><th>TYPE</th><th>22GP</th><th>42GP</th><th>45GP</th><th>22RE</th><th>45RE</th><th>22UT</th><th>42UT</th><th>22PC</th><th>42PC</th></tr></thead><tbody><tr class='cur'><td>Current stock</td><td>2,159</td><td>1</td><td>1,297</td><td>11</td><td>51</td><td>1</td><td>2</td><td>2</td><td>1</td></tr><tr class=''><td>MT return (inbound)</td><td>99</td><td class='z'>–</td><td>138</td><td>1</td><td>22</td><td class='z'>–</td><td class='z'>–</td><td class='z'>–</td><td class='z'>–</td></tr><tr class=''><td>Booking, this wk</td><td>123</td><td class='z'>–</td><td>80</td><td class='z'>–</td><td>18</td><td class='z'>–</td><td class='z'>–</td><td class='z'>–</td><td class='z'>–</td></tr><tr class=''><td>Booking, next wk</td><td>211</td><td class='z'>–</td><td>125</td><td class='z'>–</td><td>15</td><td class='z'>–</td><td class='z'>–</td><td class='z'>–</td><td class='z'>–</td></tr><tr class='bal'><td>Balance</td><td><span class='pill p-sur'>2,282</span></td><td><span class='pill p-tig'>1</span></td><td><span class='pill p-sur'>1,230</span></td><td><span class='pill p-nor'>12</span></td><td><span class='pill p-nor'>40</span></td><td><span class='pill p-tig'>1</span></td><td><span class='pill p-tig'>2</span></td><td><span class='pill p-tig'>2</span></td><td><span class='pill p-tig'>1</span></td></tr></tbody></table><details class='ov-det'><summary>ดูแยกตามสถานที่</summary><table class='gt'><thead><tr><th>สถานที่</th><th>ตู้ว่างในสต็อก</th><th>FULL ขาเข้า</th><th title='22-25/10/2026'>Booking WK1ST</th><th title='26/10-01/11/2026'>Booking WK2ND</th></tr></thead><tbody><tr><td class='gname'><b>LCMT</b><span class='badge'>TERMINAL</span></td><td>6</td><td>137</td><td class='dash'>–</td><td class='dash'>–</td></tr><tr><td class='gname'><b>ESCO</b><span class='badge'>TERMINAL</span></td><td>1</td><td>58</td><td class='dash'>–</td><td class='dash'>–</td></tr><tr><td class='gname'><b>LCIT</b><span class='badge'>TERMINAL</span></td><td>2</td><td>9</td><td class='dash'>–</td><td class='dash'>–</td></tr><tr><td class='gname'><b>HPT</b><span class='badge'>TERMINAL</span></td><td>0</td><td>56</td><td class='dash'>–</td><td class='dash'>–</td></tr><tr><td class='gname'><b>HAST</b><span class='badge dep'>DEPOT</span></td><td>1,381</td><td class='dash'>–</td><td>26</td><td>69</td></tr><tr><td class='gname'><b>CELLO</b><span class='badge dep'>DEPOT</span></td><td>153</td><td class='dash'>–</td><td>4</td><td>32</td></tr><tr><td class='gname'><b>PW</b><span class='badge dep'>DEPOT</span></td><td>1,624</td><td class='dash'>–</td><td>191</td><td>250</td></tr><tr class='tot'><td>รวม LCH</td><td>3,525</td><td>260</td><td>221</td><td>351</td></tr></tbody></table></details></div></section>
+<div class="ov-leg"><span class="sur">Surplus</span><span class="nor">Normal</span>
+<span class="tig">Tight</span><span class="sho">Shortage</span></div>
+<p class="ov-note">Balance = ตู้ในสต็อก + FULL ขาเข้า &minus; Booking 2 สัปดาห์ (WK1ST 22-25/10/2026, WK2ND 26/10-01/11/2026) ·
+Shortage = คงเหลือ ≤ 0 · Tight = คงเหลือน้อยกว่า booking 2 สัปดาห์ · Normal = 1&ndash;3 เท่า · Surplus = มากกว่า 3 เท่า</p>
 </div>
 <script>
 (function(){
