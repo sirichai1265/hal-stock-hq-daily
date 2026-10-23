@@ -1,17 +1,21 @@
 <!doctype html><html lang="th"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Stock Report HQ &ndash; ภาพรวม 2026-10-22</title>
+<title>Stock Report HQ &ndash; ภาพรวม 2026-10-23</title>
 <style>
 :root{--navy:#0d2b46;--ink:#1b2735;--mut:#64748b;--line:#e2e8f0;--bkk:#1d6fe8;--lch:#d72638}
 *{box-sizing:border-box}
 body{margin:0;color:var(--ink);background:#e9eef5;font:14px/1.5 "Segoe UI","Leelawadee UI","Noto Sans Thai",Roboto,sans-serif}
 .accent-bar{height:5px;background:linear-gradient(90deg,var(--bkk),var(--lch))}
 .wrap{max-width:1800px;margin:0 auto;padding:18px 18px 48px}
-.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;
-background:linear-gradient(rgba(255,255,255,.88),rgba(255,255,255,.88)),url('header.jpg') center/cover;
-border:1px solid var(--line);border-radius:16px;padding:18px 26px;margin:0 0 12px;box-shadow:0 5px 16px rgba(15,35,60,.08)}
-.topbar img{height:46px;width:auto;object-fit:contain}
+.topbar{position:relative;display:flex;justify-content:space-between;align-items:flex-end;gap:16px;min-height:160px;
+background:linear-gradient(180deg,rgba(15,30,45,0) 30%,rgba(15,30,45,.62) 100%),#32414f url('header.jpg') center 38%/cover;
+border-radius:16px;padding:18px 26px;margin:0 0 12px;box-shadow:0 6px 18px rgba(15,35,60,.18)}
+.tb-logo{position:absolute;top:14px;left:26px;background:#fff;border-radius:12px;padding:6px 12px;
+box-shadow:0 3px 10px rgba(15,35,60,.25);line-height:0}
+.tb-logo img{height:40px;width:auto;display:block}
 h1{font-size:24px;margin:0 0 2px;color:var(--navy);font-weight:800}
+.topbar h1{color:#fff;font-size:30px;text-shadow:0 1px 6px rgba(0,0,0,.35)}
+.topbar .sub{color:rgba(255,255,255,.92)}
 .sub{color:var(--mut);margin:0;font-size:14px}
 .toolbar{display:flex;gap:6px;margin:0 0 12px}
 .filter-btn{cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--mut);
@@ -22,6 +26,11 @@ padding:9px 18px;border-radius:999px;transition:all .15s}
 .filter-btn[data-filter="all"].active{background:var(--navy)}
 .filter-btn[data-filter="bkk"].active{background:var(--bkk)}
 .filter-btn[data-filter="lch"].active{background:var(--lch)}
+.nav{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px}
+.nav a{text-decoration:none;font-family:inherit;font-weight:700;font-size:12.5px;line-height:1;letter-spacing:.03em;
+padding:9px 18px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--mut);transition:all .15s}
+.nav a:hover{border-color:var(--bkk);color:var(--navy)}
+.nav a.on{background:var(--navy);border-color:transparent;color:#fff}
 .hide{display:none!important}
 .xl-wrap{overflow-x:auto;background:#fff;border:1px solid #cbd5e1;border-radius:10px;padding:10px}
 .xl{width:max-content;font-family:Arial,"Segoe UI","Noto Sans Thai",sans-serif;font-size:13px;color:#000}
@@ -77,11 +86,11 @@ white-space:nowrap;overflow:hidden;background:#fff}
 .rf tr.tot td{border-top:3px double #000;font-weight:700;background:#d9d9d9}
 .rf-title{font-weight:700;color:#1f4e79;margin:16px 0 0;font-size:15px}
 footer{margin-top:26px;color:var(--mut);font-size:12px;text-align:center}
-@media(max-width:600px){.topbar{flex-direction:column;align-items:flex-start;padding:14px 16px}
-.topbar img{height:34px}h1{font-size:20px}.wrap{padding:12px 10px 36px}}
+@media(max-width:600px){.topbar{padding:14px 16px;min-height:150px}.tb-logo{left:16px}
+.tb-logo img{height:30px}h1{font-size:20px}.wrap{padding:12px 10px 36px}}
 
 body{background:#eaf0f7}
-.ov{max-width:1240px;margin:0 auto;padding:22px 20px 48px}
+.ov{max-width:1320px;margin:0 auto;padding:22px 20px 48px}
 .ov-banner{position:relative;height:158px;border-radius:18px;overflow:hidden;
 background:#32414f url('header.jpg') center 38%/cover;box-shadow:0 8px 22px rgba(15,35,60,.18)}
 .ov-banner:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,30,45,0) 25%,rgba(15,30,45,.62) 100%)}
@@ -89,12 +98,11 @@ background:#32414f url('header.jpg') center 38%/cover;box-shadow:0 8px 22px rgba
 .ov-banner h1{margin:0;color:#fff;font-size:36px;line-height:1.15;font-weight:800;letter-spacing:.2px}
 .ov-banner .bs{font-size:13px;letter-spacing:.06em;opacity:.9;margin-top:2px}
 .ov-banner .bd{position:absolute;z-index:1;right:20px;bottom:14px;color:#fff;font:700 22px ui-monospace,Consolas,Menlo,monospace}
+.ov-logo{position:absolute;z-index:1;top:14px;left:20px;background:#fff;border-radius:12px;padding:6px 12px;
+box-shadow:0 3px 10px rgba(15,35,60,.25);line-height:0}
+.ov-logo img{height:40px;width:auto;display:block}
 .ov-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:14px 0 4px}
-.nav{display:flex;gap:8px;margin:0 12px 0 0}
-.nav a{text-decoration:none;font-weight:700;font-size:13px;padding:8px 16px;border-radius:999px;
-border:1px solid var(--line);background:#fff;color:var(--mut)}
-.nav a:hover{border-color:var(--bkk);color:var(--navy)}
-.nav a.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.ov-bar .nav{margin:0 12px 0 0}
 .ov-bar .toolbar{margin:0}
 .zone-h{display:flex;align-items:baseline;gap:10px;margin:26px 0 12px}
 .zone-h h2{margin:0;font-size:36px;line-height:1.1;color:#1f6aa5;font-weight:800}
@@ -110,7 +118,7 @@ padding:16px 20px 12px;overflow-x:auto}
 .cc-u{text-align:right}
 .cc-u b{display:block;font:700 26px ui-monospace,Consolas,Menlo,monospace;color:#16222f;line-height:1.1}
 .cc-u small{color:#8a97a6;font-size:11px;letter-spacing:.08em}
-table.ct{width:100%;border-collapse:collapse;min-width:640px;font-family:ui-monospace,Consolas,Menlo,monospace;font-size:14px}
+table.ct{width:100%;border-collapse:collapse;min-width:520px;font-family:ui-monospace,Consolas,Menlo,monospace;font-size:14px}
 .ct th{background:#f2f6fa;color:#8a97a6;font:600 11.5px "Segoe UI",sans-serif;padding:7px 8px;text-align:right}
 .ct th:first-child,.ct td:first-child{text-align:left}
 .ct td{padding:8px 8px;text-align:right;border-bottom:1px solid #e8eef4;color:#2b3a4a}
@@ -135,15 +143,24 @@ background:#e2e8f0;color:#475569;vertical-align:1px}
 .badge.dep{background:#dbeafe;color:#1d4ed8}
 .gt td.dash{color:#cbd5e1}
 .gt tr.tot td{border-top:2px solid var(--navy);font-weight:800;color:var(--navy);border-bottom:0}
+.cards2{display:grid;grid-template-columns:repeat(auto-fit,minmax(540px,1fr));gap:18px}
+.cards2 .ccard{min-width:0;padding:14px 14px 10px}
+.cards2 .ct{min-width:0;font-size:12.5px}
+.cards2 .ct td,.cards2 .ct th{padding-left:3px;padding-right:3px}
+.cards2 .ct td:first-child{font-size:12px;white-space:normal;width:84px;line-height:1.25}
+.cards2 .ct tr.cur td:first-child{font-size:13px}
+.cards2 .ct tr.cur td{font-size:14px}
+.cards2 .pill{min-width:0;padding:3px 5px;font-size:12px}
+.ccard.skr{border-left-color:#c0392b}.ccard.skr .cc-n i{background:#c0392b}.ccard.skr .cc-n b{color:#c0392b}
 .ov-leg{display:flex;flex-wrap:wrap;gap:18px;margin:26px 0 0;padding-top:14px;border-top:1px solid #cfd8e3;color:#5b6b7c;font-size:12.5px}
 .ov-leg span:before{content:"";display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;vertical-align:-1px;background:var(--c)}
 .ov-leg .sur{--c:#1d5fa8}.ov-leg .nor{--c:#15803d}.ov-leg .tig{--c:#946400}.ov-leg .sho{--c:#b42318}
 .ov-note{margin:8px 0 0;color:#8a97a6;font-size:12px}
-@media(max-width:600px){.ov-banner h1{font-size:26px}.zone-h h2{font-size:28px}.ov-banner .bd{font-size:16px}}
+@media(max-width:600px){.ov-logo img{height:30px}.ov-banner h1{font-size:26px}.zone-h h2{font-size:28px}.ov-banner .bd{font-size:16px}}
 </style></head><body>
 <div class="ov">
-<header class="ov-banner"><div class="bt"><h1>Container Stock Condition</h1>
-<div class="bs">HEUNG A LINE (THAILAND)</div></div><div class="bd">22 Oct 2026</div></header>
+<header class="ov-banner"><div class="ov-logo"><img src="logo.png" alt="HEUNG A LINE"></div><div class="bt"><h1>Container Stock Condition</h1>
+<div class="bs">HEUNG A LINE (THAILAND)</div></div><div class="bd">23 Oct 2026</div></header>
 <div class="ov-bar"><nav class='nav'><a href='index.html'>📋 ตารางรายงาน</a><a href='overview.html' class='on'>📊 ภาพรวม</a></nav>
 <div class="toolbar">
 <button type="button" class="filter-btn active" data-filter="all">ALL</button>
@@ -153,15 +170,15 @@ background:#e2e8f0;color:#475569;vertical-align:1px}
 <section data-zone="bkk">
 <div class="zone-h"><h2>Bangkok</h2><small>THBKK</small></div>
 <div class="ccard"><div class="cc-h"><div class="cc-n"><i></i><div><b>HEUNG A</b><small>Bangkok</small></div></div>
-<div class="cc-u"><b>2,955</b><small>UNITS ON HAND</small></div></div>
-<table class='ct'><thead><tr><th>TYPE</th><th>22GP</th><th>42GP</th><th>45GP</th><th>22RE</th><th>45RE</th><th>22UT</th><th>42UT</th><th>22PC</th><th>42PC</th></tr></thead><tbody><tr class='cur'><td>Current stock</td><td>1,578</td><td>4</td><td>1,317</td><td>40</td><td>16</td><td class='z'>–</td><td class='z'>–</td><td class='z'>–</td><td class='z'>–</td></tr><tr class=''><td>MT return (inbound)</td><td>105</td><td class='z'>–</td><td>157</td><td>2</td><td>7</td><td class='z'>–</td><td class='z'>–</td><td class='z'>–</td><td class='z'>–</td></tr><tr class=''><td>Booking, this wk</td><td>112</td><td class='z'>–</td><td>50</td><td>1</td><td>5</td><td class='z'>–</td><td class='z'>–</td><td class='z'>–</td><td class='z'>–</td></tr><tr class=''><td>Booking, next wk</td><td>307</td><td class='z'>–</td><td>166</td><td>3</td><td>35</td><td class='z'>–</td><td class='z'>–</td><td class='z'>–</td><td class='z'>–</td></tr><tr class='bal'><td>Balance</td><td><span class='pill p-sur'>1,264</span></td><td><span class='pill p-tig'>4</span></td><td><span class='pill p-sur'>1,258</span></td><td><span class='pill p-sur'>38</span></td><td><span class='pill p-sho'>-17</span></td><td><span class='pill p-sho'>0</span></td><td><span class='pill p-sho'>0</span></td><td><span class='pill p-sho'>0</span></td><td><span class='pill p-sho'>0</span></td></tr></tbody></table><details class='ov-det'><summary>ดูแยกตามสถานที่</summary><table class='gt'><thead><tr><th>สถานที่</th><th>ตู้ว่างในสต็อก</th><th>FULL ขาเข้า</th><th title='22-25/10/2026'>Booking WK1ST</th><th title='26/10-01/11/2026'>Booking WK2ND</th></tr></thead><tbody><tr><td class='gname'><b>PAT</b><span class='badge'>TERMINAL</span></td><td>58</td><td>187</td><td>37</td><td>32</td></tr><tr><td class='gname'><b>UNITHAI</b><span class='badge'>TERMINAL</span></td><td>40</td><td>74</td><td>0</td><td>2</td></tr><tr><td class='gname'><b>ESCO #2</b><span class='badge'>ICD</span></td><td>0</td><td>8</td><td>0</td><td>0</td></tr><tr><td class='gname'><b>TIFFA</b><span class='badge'>ICD</span></td><td>21</td><td>2</td><td>0</td><td>0</td></tr><tr><td class='gname'><b>SMART</b><span class='badge dep'>DEPOT</span></td><td>1,511</td><td class='dash'>–</td><td>37</td><td>48</td></tr><tr><td class='gname'><b>BC2</b><span class='badge dep'>DEPOT</span></td><td>1,325</td><td class='dash'>–</td><td>94</td><td>429</td></tr><tr><td class='gname'><b>BMTP</b><span class='badge'>ICD</span></td><td>0</td><td>0</td><td class='dash'>–</td><td class='dash'>–</td></tr><tr><td class='gname'><b>SCT</b><span class='badge'>ICD</span></td><td>0</td><td>0</td><td class='dash'>–</td><td class='dash'>–</td></tr><tr class='tot'><td>รวม BKK</td><td>2,955</td><td>271</td><td>168</td><td>511</td></tr></tbody></table></details></div></section><section data-zone="lch">
+<div class="cc-u"><b>2,850</b><small>UNITS ON HAND</small></div></div>
+<table class='ct'><thead><tr><th>TYPE</th><th>22GP</th><th>42GP</th><th>45GP</th><th>22RE</th><th>45RE</th><th>22UT</th><th>42UT</th><th>22PC</th><th>42PC</th></tr></thead><tbody><tr class='cur'><td>Current stock</td><td>1,481</td><td>4</td><td>1,312</td><td>39</td><td>14</td><td class='z'>–</td><td class='z'>–</td><td class='z'>–</td><td class='z'>–</td></tr><tr class=''><td>MT return (inbound)</td><td>108</td><td class='z'>–</td><td>187</td><td>1</td><td>4</td><td class='z'>–</td><td class='z'>–</td><td class='z'>–</td><td class='z'>–</td></tr><tr class=''><td>Booking, this wk</td><td>369</td><td class='z'>–</td><td>234</td><td>6</td><td>35</td><td class='z'>–</td><td class='z'>–</td><td class='z'>–</td><td class='z'>–</td></tr><tr class=''><td>Booking, next wk</td><td>183</td><td>1</td><td>149</td><td>2</td><td>27</td><td class='z'>–</td><td class='z'>–</td><td class='z'>–</td><td class='z'>–</td></tr><tr class='bal'><td>Balance</td><td><span class='pill p-nor'>1,037</span></td><td><span class='pill p-nor'>3</span></td><td><span class='pill p-nor'>1,116</span></td><td><span class='pill p-sur'>32</span></td><td><span class='pill p-sho'>-44</span></td><td><span class='pill p-sho'>0</span></td><td><span class='pill p-sho'>0</span></td><td><span class='pill p-sho'>0</span></td><td><span class='pill p-sho'>0</span></td></tr></tbody></table><details class='ov-det'><summary>ดูแยกตามสถานที่</summary><table class='gt'><thead><tr><th>สถานที่</th><th>ตู้ว่างในสต็อก</th><th>FULL ขาเข้า</th><th title='23/10-01/11/2026'>Booking WK1ST</th><th title='02-08/11/2026'>Booking WK2ND</th></tr></thead><tbody><tr><td class='gname'><b>PAT</b><span class='badge'>TERMINAL</span></td><td>45</td><td>237</td><td>75</td><td>25</td></tr><tr><td class='gname'><b>UNITHAI</b><span class='badge'>TERMINAL</span></td><td>28</td><td>55</td><td>2</td><td>3</td></tr><tr><td class='gname'><b>ESCO #2</b><span class='badge'>ICD</span></td><td>0</td><td>8</td><td>0</td><td>2</td></tr><tr><td class='gname'><b>TIFFA</b><span class='badge'>ICD</span></td><td>1</td><td>0</td><td>20</td><td>0</td></tr><tr><td class='gname'><b>SMART</b><span class='badge dep'>DEPOT</span></td><td>1,514</td><td class='dash'>–</td><td>72</td><td>13</td></tr><tr><td class='gname'><b>BC2</b><span class='badge dep'>DEPOT</span></td><td>1,262</td><td class='dash'>–</td><td>475</td><td>319</td></tr><tr><td class='gname'><b>BMTP</b><span class='badge'>ICD</span></td><td>0</td><td>0</td><td class='dash'>–</td><td class='dash'>–</td></tr><tr><td class='gname'><b>SCT</b><span class='badge'>ICD</span></td><td>0</td><td>0</td><td class='dash'>–</td><td class='dash'>–</td></tr><tr class='tot'><td>รวม BKK</td><td>2,850</td><td>300</td><td>644</td><td>362</td></tr></tbody></table></details></div></section><section data-zone="lch">
 <div class="zone-h"><h2>Laem Chabang</h2><small>THLCH</small></div>
 <div class="ccard"><div class="cc-h"><div class="cc-n"><i></i><div><b>HEUNG A</b><small>Laem Chabang</small></div></div>
-<div class="cc-u"><b>3,525</b><small>UNITS ON HAND</small></div></div>
-<table class='ct'><thead><tr><th>TYPE</th><th>22GP</th><th>42GP</th><th>45GP</th><th>22RE</th><th>45RE</th><th>22UT</th><th>42UT</th><th>22PC</th><th>42PC</th></tr></thead><tbody><tr class='cur'><td>Current stock</td><td>2,159</td><td>1</td><td>1,297</td><td>11</td><td>51</td><td>1</td><td>2</td><td>2</td><td>1</td></tr><tr class=''><td>MT return (inbound)</td><td>99</td><td class='z'>–</td><td>138</td><td>1</td><td>22</td><td class='z'>–</td><td class='z'>–</td><td class='z'>–</td><td class='z'>–</td></tr><tr class=''><td>Booking, this wk</td><td>123</td><td class='z'>–</td><td>80</td><td class='z'>–</td><td>18</td><td class='z'>–</td><td class='z'>–</td><td class='z'>–</td><td class='z'>–</td></tr><tr class=''><td>Booking, next wk</td><td>211</td><td class='z'>–</td><td>125</td><td class='z'>–</td><td>15</td><td class='z'>–</td><td class='z'>–</td><td class='z'>–</td><td class='z'>–</td></tr><tr class='bal'><td>Balance</td><td><span class='pill p-sur'>2,282</span></td><td><span class='pill p-tig'>1</span></td><td><span class='pill p-sur'>1,230</span></td><td><span class='pill p-nor'>12</span></td><td><span class='pill p-nor'>40</span></td><td><span class='pill p-tig'>1</span></td><td><span class='pill p-tig'>2</span></td><td><span class='pill p-tig'>2</span></td><td><span class='pill p-tig'>1</span></td></tr></tbody></table><details class='ov-det'><summary>ดูแยกตามสถานที่</summary><table class='gt'><thead><tr><th>สถานที่</th><th>ตู้ว่างในสต็อก</th><th>FULL ขาเข้า</th><th title='22-25/10/2026'>Booking WK1ST</th><th title='26/10-01/11/2026'>Booking WK2ND</th></tr></thead><tbody><tr><td class='gname'><b>LCMT</b><span class='badge'>TERMINAL</span></td><td>6</td><td>137</td><td class='dash'>–</td><td class='dash'>–</td></tr><tr><td class='gname'><b>ESCO</b><span class='badge'>TERMINAL</span></td><td>1</td><td>58</td><td class='dash'>–</td><td class='dash'>–</td></tr><tr><td class='gname'><b>LCIT</b><span class='badge'>TERMINAL</span></td><td>2</td><td>9</td><td class='dash'>–</td><td class='dash'>–</td></tr><tr><td class='gname'><b>HPT</b><span class='badge'>TERMINAL</span></td><td>0</td><td>56</td><td class='dash'>–</td><td class='dash'>–</td></tr><tr><td class='gname'><b>HAST</b><span class='badge dep'>DEPOT</span></td><td>1,381</td><td class='dash'>–</td><td>26</td><td>69</td></tr><tr><td class='gname'><b>CELLO</b><span class='badge dep'>DEPOT</span></td><td>153</td><td class='dash'>–</td><td>4</td><td>32</td></tr><tr><td class='gname'><b>PW</b><span class='badge dep'>DEPOT</span></td><td>1,624</td><td class='dash'>–</td><td>191</td><td>250</td></tr><tr class='tot'><td>รวม LCH</td><td>3,525</td><td>260</td><td>221</td><td>351</td></tr></tbody></table></details></div></section>
+<div class="cc-u"><b>3,468</b><small>UNITS ON HAND</small></div></div>
+<table class='ct'><thead><tr><th>TYPE</th><th>22GP</th><th>42GP</th><th>45GP</th><th>22RE</th><th>45RE</th><th>22UT</th><th>42UT</th><th>22PC</th><th>42PC</th></tr></thead><tbody><tr class='cur'><td>Current stock</td><td>2,133</td><td>1</td><td>1,273</td><td>10</td><td>45</td><td>1</td><td>2</td><td>2</td><td>1</td></tr><tr class=''><td>MT return (inbound)</td><td>170</td><td class='z'>–</td><td>209</td><td>1</td><td>17</td><td class='z'>–</td><td class='z'>–</td><td class='z'>–</td><td class='z'>–</td></tr><tr class=''><td>Booking, this wk</td><td>384</td><td class='z'>–</td><td>203</td><td class='z'>–</td><td>35</td><td class='z'>–</td><td class='z'>–</td><td class='z'>–</td><td class='z'>–</td></tr><tr class=''><td>Booking, next wk</td><td>134</td><td class='z'>–</td><td>63</td><td class='z'>–</td><td>5</td><td class='z'>–</td><td class='z'>–</td><td class='z'>–</td><td class='z'>–</td></tr><tr class='bal'><td>Balance</td><td><span class='pill p-sur'>2,143</span></td><td><span class='pill p-tig'>1</span></td><td><span class='pill p-sur'>1,216</span></td><td><span class='pill p-nor'>11</span></td><td><span class='pill p-tig'>22</span></td><td><span class='pill p-tig'>1</span></td><td><span class='pill p-tig'>2</span></td><td><span class='pill p-tig'>2</span></td><td><span class='pill p-tig'>1</span></td></tr></tbody></table><details class='ov-det'><summary>ดูแยกตามสถานที่</summary><table class='gt'><thead><tr><th>สถานที่</th><th>ตู้ว่างในสต็อก</th><th>FULL ขาเข้า</th><th title='23/10-01/11/2026'>Booking WK1ST</th><th title='02-08/11/2026'>Booking WK2ND</th></tr></thead><tbody><tr><td class='gname'><b>LCMT</b><span class='badge'>TERMINAL</span></td><td>5</td><td>167</td><td class='dash'>–</td><td class='dash'>–</td></tr><tr><td class='gname'><b>ESCO</b><span class='badge'>TERMINAL</span></td><td>2</td><td>174</td><td class='dash'>–</td><td class='dash'>–</td></tr><tr><td class='gname'><b>LCIT</b><span class='badge'>TERMINAL</span></td><td>2</td><td>9</td><td class='dash'>–</td><td class='dash'>–</td></tr><tr><td class='gname'><b>HPT</b><span class='badge'>TERMINAL</span></td><td>0</td><td>47</td><td class='dash'>–</td><td class='dash'>–</td></tr><tr><td class='gname'><b>HAST</b><span class='badge dep'>DEPOT</span></td><td>1,387</td><td class='dash'>–</td><td>166</td><td>25</td></tr><tr><td class='gname'><b>CELLO</b><span class='badge dep'>DEPOT</span></td><td>151</td><td class='dash'>–</td><td>42</td><td>3</td></tr><tr><td class='gname'><b>PW</b><span class='badge dep'>DEPOT</span></td><td>1,563</td><td class='dash'>–</td><td>414</td><td>174</td></tr><tr class='tot'><td>รวม LCH</td><td>3,468</td><td>397</td><td>622</td><td>202</td></tr></tbody></table></details></div></section>
 <div class="ov-leg"><span class="sur">Surplus</span><span class="nor">Normal</span>
 <span class="tig">Tight</span><span class="sho">Shortage</span></div>
-<p class="ov-note">Balance = ตู้ในสต็อก + FULL ขาเข้า &minus; Booking 2 สัปดาห์ (WK1ST 22-25/10/2026, WK2ND 26/10-01/11/2026) ·
+<p class="ov-note">Balance = ตู้ในสต็อก + FULL ขาเข้า &minus; Booking 2 สัปดาห์ (WK1ST 23/10-01/11/2026, WK2ND 02-08/11/2026) ·
 Shortage = คงเหลือ ≤ 0 · Tight = คงเหลือน้อยกว่า booking 2 สัปดาห์ · Normal = 1&ndash;3 เท่า · Surplus = มากกว่า 3 เท่า</p>
 </div>
 <script>
